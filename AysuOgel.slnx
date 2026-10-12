@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AysuOgel.Api/AysuOgel.Api.csproj" />
+  <Project Path="AysuOgel.Business/AysuOgel.Business.csproj" />
+  <Project Path="AysuOgel.DataAccess/AysuOgel.DataAccess.csproj" />
+  <Project Path="AysuOgel.Entities/AysuOgel.Entities.csproj" />
+  <Project Path="AysuOgel.Web/AysuOgel.Web.csproj" />
+</Solution>

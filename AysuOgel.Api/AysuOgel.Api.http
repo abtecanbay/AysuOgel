@@ -1,0 +1,6 @@
+@AysuOgel.Api_HostAddress = http://localhost:5010
+
+GET {{AysuOgel.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
