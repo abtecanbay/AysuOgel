@@ -45,9 +45,7 @@ namespace AysuOgel.DataAccess.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

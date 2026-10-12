@@ -20,4 +20,8 @@
     <ProjectReference Include="..\AysuOgel.DataAccess\AysuOgel.DataAccess.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>

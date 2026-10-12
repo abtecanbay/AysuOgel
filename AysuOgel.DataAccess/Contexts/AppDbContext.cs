@@ -35,9 +35,6 @@ public class AppDbContext : DbContext
             entity.Property(x => x.ImageUrl)
                 .HasMaxLength(1000);
 
-            entity.Property(x => x.IsActive)
-                .HasDefaultValue(true);
-
             entity.HasIndex(x => new
             {
                 x.IsActive,

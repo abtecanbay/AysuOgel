@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Yönetim</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-expand navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" asp-area="Admin" asp-controller="Services" asp-action="Index">Yönetim</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Admin" asp-controller="Services" asp-action="Index">Hizmetler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" target="_blank">Siteyi Gör</a>
+                    </li>
+                </ul>
+                <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post">
+                    <button class="btn btn-outline-light btn-sm">Çıkış</button>
+                </form>
+            }
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
