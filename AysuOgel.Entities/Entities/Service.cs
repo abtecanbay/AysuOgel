@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace AysuOgel.Entities.Entities;
-
 public class Service
 {
     public int Id { get; set; }
