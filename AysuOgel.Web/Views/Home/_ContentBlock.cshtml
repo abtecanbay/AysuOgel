@@ -1,0 +1,48 @@
+﻿@model ContentBlock
+
+<section class="post-block">
+    @switch (Model.Layout)
+    {
+        case BlockLayout.ImageLeft:
+        case BlockLayout.ImageRight:
+            var first = Model.Images.FirstOrDefault();
+            <div class="row align-items-center g-4">
+                @if (first != null)
+                {
+                    <div class="col-md-6 @(Model.Layout == BlockLayout.ImageRight ? "order-md-2" : "")">
+                        <img src="@Url.ImageUrl(first.Url)" alt="@first.Alt" class="img-fluid rounded media-img" loading="lazy" />
+                    </div>
+                }
+                <div class="col-md-6">
+                    <h2 class="h3">@Model.Title</h2>
+                    <p class="post-text">@Model.Text</p>
+                </div>
+            </div>
+            break;
+
+        case BlockLayout.Gallery:
+            <h2 class="h3">@Model.Title</h2>
+            @if (!string.IsNullOrEmpty(Model.Text))
+            {
+                <p class="post-text">@Model.Text</p>
+            }
+            <div class="row row-cols-2 row-cols-lg-4 g-3">
+                @foreach (var img in Model.Images)
+                {
+                    <figure class="col m-0">
+                        <img src="@Url.ImageUrl(img.Url)" alt="@img.Alt" class="img-fluid rounded media-img" loading="lazy" />
+                        @if (!string.IsNullOrEmpty(img.Caption))
+                        {
+                            <figcaption class="small text-muted mt-1">@img.Caption</figcaption>
+                        }
+                    </figure>
+                }
+            </div>
+            break;
+
+        default:
+            <h2 class="h3">@Model.Title</h2>
+            <p class="post-text">@Model.Text</p>
+            break;
+    }
+</section>

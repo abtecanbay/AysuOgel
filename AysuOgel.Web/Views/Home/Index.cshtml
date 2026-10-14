@@ -1,8 +1,56 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = "Anasayfa";
+    var hero = Model.Content.Hero;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero mb-5">
+    @if (!string.IsNullOrEmpty(hero.ImageUrl))
+    {
+        <img class="hero-img" src="@Url.ImageUrl(hero.ImageUrl)" alt="" />
+    }
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold">@hero.Title</h1>
+        @if (!string.IsNullOrEmpty(hero.Subtitle))
+        {
+            <p class="lead">@hero.Subtitle</p>
+        }
+        @if (!string.IsNullOrEmpty(hero.ButtonUrl))
+        {
+            <a class="btn btn-light btn-lg" href="@hero.ButtonUrl">@hero.ButtonText</a>
+        }
+    </div>
+</section>
+
+@foreach (var block in Model.Content.Blocks)
+{
+    <partial name="_ContentBlock" model="block" />
+}
+
+@if (Model.Services.Any())
+{
+    <section class="post-block">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <h2 class="h3 mb-0">Hizmetlerimiz</h2>
+            <a href="/hizmetler">Tümünü gör</a>
+        </div>
+        <div class="row row-cols-2 row-cols-lg-4 g-3">
+            @foreach (var s in Model.Services)
+            {
+                <div class="col">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(s.ImageUrl))
+                        {
+                            <img src="@Url.ImageUrl(s.ImageUrl)" class="card-img-top media-img" alt="@s.Name" loading="lazy" />
+                        }
+                        <div class="card-body">
+                            <h3 class="h6 card-title">@s.Name</h3>
+                            <p class="card-text small text-muted">@s.ShortDescription</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
