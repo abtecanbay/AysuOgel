@@ -12,18 +12,40 @@ public class StaticHomePageService : IHomePageService
     {
         var content = new HomePageContent
         {
-            Hero = new HeroSection
+            Banners =
             {
-                Title = "Hoş geldiniz",
-                Subtitle = "Bu alan örnek metindir. Slogan ve kısa tanıtım yazısı buraya gelecek.",
-                ImageUrl = Img("hero", 1600, 700),
-                ButtonText = "Hizmetlerimiz",
-                ButtonUrl = "/hizmetler"
+                new BannerSlide
+                {
+                    Badge = "Öne çıkan",
+                    Title = "Kendinize iyi bakmanın zamanı",
+                    Subtitle = "Bu alan örnek metindir. Kampanya ya da öne çıkan içerik buraya gelecek.",
+                    ImageUrl = Img("banner1", 1600, 700),
+                    ButtonText = "Devamını oku",
+                    LinkUrl = "#post-hakkimizda"
+                },
+                new BannerSlide
+                {
+                    Badge = "Yeni",
+                    Title = "Hizmetlerimizi keşfedin",
+                    Subtitle = "Bu alan örnek metindir. Hizmetlerin kısa tanıtımı.",
+                    ImageUrl = Img("banner2", 1600, 700),
+                    ButtonText = "Hizmetlerimiz",
+                    LinkUrl = "/hizmetler"
+                },
+                new BannerSlide
+                {
+                    Title = "Galeriden kareler",
+                    Subtitle = "Bu alan örnek metindir.",
+                    ImageUrl = Img("banner3", 1600, 700),
+                    ButtonText = "Galeriye git",
+                    LinkUrl = "#post-galeri"
+                }
             },
             Blocks =
             {
                 new ContentBlock
                 {
+                    Slug = "hakkimizda",
                     Title = "Hakkımızda",
                     Text = "Bu alan örnek metindir.\nİkinci paragraf için yeni satıra geçebilirsin.",
                     Layout = BlockLayout.ImageLeft,
@@ -31,6 +53,7 @@ public class StaticHomePageService : IHomePageService
                 },
                 new ContentBlock
                 {
+                    Slug = "neler-yapiyoruz",
                     Title = "Neler yapıyoruz?",
                     Text = "Bu alan örnek metindir. Hizmetlerin kısa tanıtımı burada olabilir.",
                     Layout = BlockLayout.ImageRight,
@@ -38,6 +61,7 @@ public class StaticHomePageService : IHomePageService
                 },
                 new ContentBlock
                 {
+                    Slug = "galeri",
                     Title = "Galeri",
                     Text = "Örnek görseller.",
                     Layout = BlockLayout.Gallery,

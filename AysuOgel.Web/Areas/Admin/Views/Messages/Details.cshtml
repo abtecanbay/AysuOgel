@@ -1,0 +1,39 @@
+﻿@model ContactMessage
+@using AysuOgel.Web.Helpers
+@{
+    ViewData["Title"] = "Mesaj";
+    var phoneDigits = new string(Model.Phone.Where(ch => char.IsDigit(ch) || ch == '+').ToArray());
+}
+
+<h1 class="h3 mb-3">@Model.FirstName @Model.LastName</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Tarih</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</dd>
+
+    <dt class="col-sm-3">Konu</dt>
+    <dd class="col-sm-9">@Model.Subject.DisplayName()</dd>
+
+    @if (Model.RequestedAppointmentAt.HasValue)
+{
+    <dt class="col-sm-3">Talep edilen randevu</dt>
+    <dd class="col-sm-9 fw-bold">@Model.RequestedAppointmentAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+}
+
+    <dt class="col-sm-3">E-posta</dt>
+    <dd class="col-sm-9"><a href="mailto:@Model.Email">@Model.Email</a></dd>
+
+    <dt class="col-sm-3">Telefon</dt>
+    <dd class="col-sm-9"><a href="tel:@phoneDigits">@Model.Phone</a></dd>
+
+    <dt class="col-sm-3">Mesaj</dt>
+    <dd class="col-sm-9" style="white-space: pre-line">@Model.Message</dd>
+</dl>
+
+<div class="d-flex gap-2">
+    <a asp-action="Index" class="btn btn-outline-secondary">Listeye dön</a>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+          onsubmit="return confirm('Bu mesaj silinsin mi?');">
+        <button class="btn btn-outline-danger">Sil</button>
+    </form>
+</div>

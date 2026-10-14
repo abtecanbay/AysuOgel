@@ -1,0 +1,62 @@
+﻿@model ContentBlock
+
+<section class="post-block reveal" id="@(string.IsNullOrEmpty(Model.Slug) ? null : "post-" + Model.Slug)">
+    @switch (Model.Layout)
+    {
+        case BlockLayout.ImageLeft:
+        case BlockLayout.ImageRight:
+            var first = Model.Images.FirstOrDefault(i => !string.IsNullOrWhiteSpace(i.Url));
+            <div class="row align-items-center g-4">
+                <div class="col-md-6 @(Model.Layout == BlockLayout.ImageRight ? "order-md-2" : "")">
+                    @if (first != null)
+                    {
+                        <img src="@Url.ImageUrl(first.Url)" alt="@first.Alt" class="media-img shadow-sm" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="media-placeholder" role="img" aria-label="@Model.Title görseli için ayrılmış alan">
+                            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="3" />
+                                <circle cx="9" cy="9" r="2" />
+                                <path d="m21 15-5-5L5 21" />
+                            </svg>
+                            <span>Görsel eklenecek</span>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <h2 class="h3 section-title">@Model.Title</h2>
+                    <p class="post-text">@Model.Text</p>
+                </div>
+            </div>
+            break;
+
+        case BlockLayout.Gallery:
+            <h2 class="h3 section-title">@Model.Title</h2>
+            @if (!string.IsNullOrEmpty(Model.Text))
+            {
+                <p class="post-text">@Model.Text</p>
+            }
+            <div class="row row-cols-2 row-cols-lg-4 g-3">
+                @foreach (var img in Model.Images)
+                {
+                    <figure class="col m-0">
+                        <a class="gallery-link" href="@Url.ImageUrl(img.Url)" data-lightbox data-caption="@img.Caption">
+                            <img src="@Url.ImageUrl(img.Url)" alt="@img.Alt" class="media-img" loading="lazy" />
+                        </a>
+                        @if (!string.IsNullOrEmpty(img.Caption))
+                        {
+                            <figcaption class="small text-muted mt-1">@img.Caption</figcaption>
+                        }
+                    </figure>
+                }
+            </div>
+            break;
+
+        default:
+            <h2 class="h3 section-title">@Model.Title</h2>
+            <p class="post-text">@Model.Text</p>
+            break;
+    }
+</section>

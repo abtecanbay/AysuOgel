@@ -1,0 +1,23 @@
+﻿@model AboutPageContent
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="page-head reveal">
+    <h1 class="display-6 fw-bold section-title">@Model.Title</h1>
+    @if (!string.IsNullOrEmpty(Model.Intro))
+    {
+        <p class="lead mb-0">@Model.Intro</p>
+    }
+</section>
+
+@foreach (var block in Model.Blocks)
+{
+    <partial name="_ContentBlock" model="block" />
+}
+
+<section class="cta-band reveal">
+    <h2 class="h4 mb-2">Hizmetlerimizi inceleyin</h2>
+    <p class="mb-3">Size uygun hizmetleri keşfedin.</p>
+    <a class="btn btn-banner btn-lg" href="/hizmetler">Hizmetlerimiz</a>
+</section>

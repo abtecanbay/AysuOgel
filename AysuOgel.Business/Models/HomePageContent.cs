@@ -15,17 +15,19 @@ public class ImageItem
     public string? Caption { get; set; }
 }
 
-public class HeroSection
+public class BannerSlide
 {
     public string Title { get; set; } = string.Empty;
     public string? Subtitle { get; set; }
-    public string? ImageUrl { get; set; }
+    public string? Badge { get; set; }          // "Kampanya", "Yeni" gibi küçük etiket
+    public string ImageUrl { get; set; } = string.Empty;
     public string? ButtonText { get; set; }
-    public string? ButtonUrl { get; set; }
+    public string? LinkUrl { get; set; }        // "#post-hakkimizda" veya "/hizmetler"
 }
 
 public class ContentBlock
 {
+    public string Slug { get; set; } = string.Empty;   // sayfa içi bağlantı: #post-{Slug}
     public string Title { get; set; } = string.Empty;
     public string? Text { get; set; }
     public BlockLayout Layout { get; set; } = BlockLayout.TextOnly;
@@ -34,6 +36,6 @@ public class ContentBlock
 
 public class HomePageContent
 {
-    public HeroSection Hero { get; set; } = new();
+    public List<BannerSlide> Banners { get; set; } = new();
     public List<ContentBlock> Blocks { get; set; } = new();
 }

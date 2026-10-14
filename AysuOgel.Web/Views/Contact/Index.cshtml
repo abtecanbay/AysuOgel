@@ -1,0 +1,152 @@
+﻿@model ContactFormViewModel
+@using AysuOgel.Entities.Entities
+@using AysuOgel.Business.Abstract
+@inject IAppointmentSlotService Slots
+
+@{
+    ViewData["Title"] = "İletişim";
+}
+
+<section class="page-head reveal">
+    <h1 class="display-6 fw-bold section-title">İletişim ve Randevu</h1>
+    <p class="lead mb-0">Bilgi almak ya da randevu talep etmek için formu doldurun, size dönüş yapalım.</p>
+</section>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-5 reveal">
+        <div class="card h-100 contact-card">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Bize ulaşın</h2>
+                <ul class="contact-info list-unstyled mb-4">
+                    <li><span class="compare-label">Adres</span>Çankaya, Ankara (detaylı adres yakında eklenecek)</li>
+                    <li><span class="compare-label">Telefon</span>Bu alan örnek metindir.</li>
+                    <li><span class="compare-label">Çalışma saatleri</span>Bu alan örnek metindir.</li>
+                </ul>
+                <div class="media-placeholder" role="img" aria-label="Harita için ayrılmış alan">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>Harita eklenecek</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7 reveal">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                @if (TempData["ContactSuccess"] is string success)
+                {
+                    <div class="alert alert-success" role="status">@success</div>
+                }
+
+                <form asp-action="Index" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" autocomplete="family-name" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" type="email" class="form-control" autocomplete="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label"></label>
+                            <input asp-for="Phone" type="tel" class="form-control" autocomplete="tel" placeholder="05xx xxx xx xx" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Subject" class="form-label"></label>
+                            <select asp-for="Subject" asp-items="Html.GetEnumSelectList<ContactSubject>()" class="form-select">
+                                <option value="">Konu seçin</option>
+                            </select>
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+
+                            <div class="col-12">
+                                @{
+                                    var calendarOpen = string.IsNullOrEmpty(Model.AppointmentSlot);
+                                }
+                                <div class="collapse @(Model.Subject == ContactSubject.RandevuTalebi ? "show" : "")" id="apptPanel"
+                                     data-appt-value="@((int)ContactSubject.RandevuTalebi)"
+                                     data-min="@Slots.MinDate.ToString("yyyy-MM-dd")"
+                                     data-max="@Slots.MaxDate.ToString("yyyy-MM-dd")"
+                                     data-closed="@string.Join(",", Slots.ClosedWeekdays)"
+                                     data-slots-url="@Url.Action("Slots", "Contact")">
+                                    <div class="appt-box">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <span class="form-label d-block">Randevu tarihi</span>
+                                                <button type="button" id="apptDateBtn" class="appt-field @(calendarOpen ? "" : "collapsed")"
+                                                        data-bs-toggle="collapse" data-bs-target="#apptCalendar"
+                                                        aria-expanded="@(calendarOpen ? "true" : "false")" aria-controls="apptCalendar">
+                                                    <span id="apptDateText" class="placeholder-text">Tarih seçin</span>
+                                                </button>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <span class="form-label d-block">Randevu saati</span>
+                                                <div class="dropdown">
+                                                    <button type="button" id="apptTimeBtn" class="appt-field" data-bs-toggle="dropdown"
+                                                            aria-expanded="false" disabled>
+                                                        <span id="apptTimeText" class="placeholder-text">Önce tarih seçin</span>
+                                                    </button>
+                                                    <ul class="dropdown-menu appt-menu" id="apptTimeMenu"></ul>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="collapse @(calendarOpen ? "show" : "")" id="apptCalendar">
+                                                    <div class="calendar" id="calendar"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input asp-for="AppointmentSlot" type="hidden" />
+                                        <span asp-validation-for="AppointmentSlot" class="text-danger d-block mt-2"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Message" class="form-label"></label>
+                            <textarea asp-for="Message" class="form-control" rows="5" maxlength="2000"></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                        </div>
+
+                        <div class="hp" aria-hidden="true">
+                            <label asp-for="Website">Web sitesi</label>
+                            <input asp-for="Website" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input asp-for="KvkkAccepted" class="form-check-input" />
+                                <label asp-for="KvkkAccepted" class="form-check-label">
+                                    Kişisel verilerimin, talebime dönüş yapılması amacıyla işlenmesini kabul ediyorum.
+                                </label>
+                                <span asp-validation-for="KvkkAccepted" class="text-danger d-block"></span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-brand btn-lg">Gönder</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/appointment.js" asp-append-version="true"></script>
+}

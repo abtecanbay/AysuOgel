@@ -1,4 +1,5 @@
 ﻿using AysuOgel.Business.Abstract;
+using AysuOgel.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AysuOgel.Web.Controllers;
@@ -6,9 +7,19 @@ namespace AysuOgel.Web.Controllers;
 public class ServicesController : Controller
 {
     private readonly IServiceService _services;
-    public ServicesController(IServiceService services) => _services = services;
+    private readonly IServicesPageService _page;
+
+    public ServicesController(IServiceService services, IServicesPageService page)
+    {
+        _services = services;
+        _page = page;
+    }
 
     [Route("hizmetler")]
     public async Task<IActionResult> Index() =>
-        View(await _services.GetActiveAsync());
+        View(new ServicesPageViewModel
+        {
+            Content = await _page.GetAsync(),
+            Services = await _services.GetActiveAsync()
+        });
 }

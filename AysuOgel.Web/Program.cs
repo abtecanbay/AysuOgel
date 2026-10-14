@@ -3,6 +3,8 @@ using AysuOgel.Business.Concrete;
 using AysuOgel.DataAccess.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +13,31 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IServicesPageService, StaticServicesPageService>();  
 builder.Services.AddScoped<IHomePageService, StaticHomePageService>();
+builder.Services.AddScoped<IAboutPageService, StaticAboutPageService>();
+builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IAppointmentSlotService, StaticAppointmentSlotService>();  
 
+builder.Services.AddRateLimiter(o =>
+{
+    o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    o.OnRejected = async (ctx, ct) =>
+    {
+        ctx.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+        await ctx.HttpContext.Response.WriteAsync(
+            "Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.", ct);
+    };
+    // Aynı IP'den 10 dakikada en fazla 5 form gönderimi
+    o.AddPolicy("contact", http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(10)
+            }));
+});
 builder.Services.AddControllersWithViews();
 
 builder.Services
@@ -34,6 +59,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

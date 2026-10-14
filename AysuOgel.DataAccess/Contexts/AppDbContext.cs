@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Service> Services => Set<Service>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,5 +42,20 @@ public class AppDbContext : DbContext
                 x.DisplayOrder
             });
         });
+
+        modelBuilder.Entity<ContactMessage>(entity =>
+        {
+            entity.ToTable("ContactMessages");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.FirstName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.LastName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Message).HasMaxLength(2000).IsRequired();
+
+            entity.HasIndex(x => new { x.IsRead, x.CreatedAt });
+        });
+
     }
 }

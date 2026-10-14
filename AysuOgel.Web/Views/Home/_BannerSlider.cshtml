@@ -1,0 +1,58 @@
+﻿@model List<BannerSlide>
+
+@if (Model.Count > 0)
+{
+    <div id="homeBanner" class="carousel slide banner mb-5" data-bs-ride="carousel" data-bs-interval="6000"
+         aria-roledescription="carousel" aria-label="Öne çıkanlar">
+        @if (Model.Count > 1)
+        {
+            <div class="carousel-indicators">
+                @for (var i = 0; i < Model.Count; i++)
+                {
+                    <button type="button" data-bs-target="#homeBanner" data-bs-slide-to="@i"
+                            class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"
+                            aria-label="Slayt @(i + 1)"></button>
+                }
+            </div>
+        }
+
+        <div class="carousel-inner">
+            @for (var i = 0; i < Model.Count; i++)
+            {
+                var s = Model[i];
+                <div class="carousel-item @(i == 0 ? "active" : "")">
+                    <img class="banner-img" src="@Url.ImageUrl(s.ImageUrl)" alt=""
+                         loading="@(i == 0 ? "eager" : "lazy")" fetchpriority="@(i == 0 ? "high" : "auto")" />
+                    <div class="banner-overlay"></div>
+                                   <div class="banner-caption">
+                    @if (!string.IsNullOrEmpty(s.Badge))
+                    {
+                        <span class="banner-badge">@s.Badge</span>
+                    }
+                    <h2 class="display-6 fw-bold">@s.Title</h2>
+                    @if (!string.IsNullOrEmpty(s.Subtitle))
+                    {
+                        <p class="lead">@s.Subtitle</p>
+                    }
+                </div>
+                    @if (!string.IsNullOrEmpty(s.LinkUrl))
+                    {
+                        <a class="btn btn-banner btn-lg banner-cta" href="@s.LinkUrl">@(s.ButtonText ?? "Detaylar")</a>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (Model.Count > 1)
+        {
+            <button class="carousel-control-prev" type="button" data-bs-target="#homeBanner" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Önceki</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#homeBanner" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Sonraki</span>
+            </button>
+        }
+    </div>
+}

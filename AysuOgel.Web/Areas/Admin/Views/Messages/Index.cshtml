@@ -1,0 +1,44 @@
+﻿@model List<ContactMessage>
+@using AysuOgel.Web.Helpers
+@{
+    ViewData["Title"] = "Mesajlar";
+}
+
+<h1 class="h3 mb-3">Mesajlar</h1>
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Tarih</th>
+            <th>Ad Soyad</th>
+            <th>Konu</th>
+            <th>Telefon</th>
+            <th>Durum</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model)
+        {
+            <tr class="@(m.IsRead ? "" : "fw-bold")">
+                <td>@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@m.FirstName @m.LastName</td>
+                <td>@m.Subject.DisplayName()</td>
+                <td>@m.Phone</td>
+                <td>@(m.RequestedAppointmentAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                <td>
+                    @if (m.IsRead) { <span class="badge bg-secondary">Okundu</span> }
+                    else { <span class="badge bg-success">Yeni</span> }
+                </td>
+                <td class="text-end">
+                    <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Görüntüle</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Henüz mesaj yok.</p>
+}

@@ -1,47 +1,85 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string c) =>
+        string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AysuOgel.Web</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - AysuOgel</title>
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AysuOgel.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AysuOgel.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+<body class="d-flex flex-column min-vh-100">
+    <header class="site-nav">
+        <nav class="navbar navbar-expand-md container">
+            <a class="navbar-brand brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z" />
+                        <path d="M4 21c3-6 6-9 10-11" />
+                    </svg>
+                </span>
+                <span>AysuOgel</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Menüyü aç/kapat">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav ms-auto gap-md-1 pt-3 pt-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link @Active("Home")" asp-area="" asp-controller="Home" asp-action="Index">Anasayfa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Active("Services")" asp-area="" asp-controller="Services" asp-action="Index">Hizmetler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Active("About")" asp-area="" asp-controller="About" asp-action="Index">Hakkımızda</a>
+                    </li>
+                    @* Hakkımda ve İletişim sayfaları yazılınca buraya eklenecek *@
+                    <li class="nav-item">
+                        <a class="nav-link @Active("Contact")" asp-area="" asp-controller="Contact" asp-action="Index">İletişim</a>
+                    </li>
+                    <li class="nav-item ms-md-2 mt-2 mt-md-0">
+                        <a class="btn btn-brand" href="/iletisim?subject=RandevuTalebi">Randevu Talep Et</a>
+                    </li>
+                </ul>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - AysuOgel.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main role="main" class="container flex-grow-1 pb-3">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer mt-5">
+        <div class="container d-flex flex-column flex-md-row justify-content-between gap-2 py-4">
+            <div>
+                <strong class="brand-text">AysuOgel</strong>
+                <div class="small">Çankaya, Ankara</div>
+            </div>
+            <div class="small align-self-md-end">&copy; @DateTime.Now.Year AysuOgel</div>
         </div>
     </footer>
+
+    <div class="modal fade" id="lightbox" tabindex="-1" aria-label="Görsel önizleme" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content bg-transparent border-0">
+                <button type="button" class="btn-close btn-close-white ms-auto mb-2" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                <img id="lightboxImg" class="img-fluid rounded-4" alt="" />
+                <p id="lightboxCap" class="text-white text-center mt-2 mb-0"></p>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

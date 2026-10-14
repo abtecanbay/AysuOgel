@@ -1,27 +1,9 @@
 ﻿@model HomeViewModel
 @{
     ViewData["Title"] = "Anasayfa";
-    var hero = Model.Content.Hero;
 }
 
-<section class="hero mb-5">
-    @if (!string.IsNullOrEmpty(hero.ImageUrl))
-    {
-        <img class="hero-img" src="@Url.ImageUrl(hero.ImageUrl)" alt="" />
-    }
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-        <h1 class="display-5 fw-bold">@hero.Title</h1>
-        @if (!string.IsNullOrEmpty(hero.Subtitle))
-        {
-            <p class="lead">@hero.Subtitle</p>
-        }
-        @if (!string.IsNullOrEmpty(hero.ButtonUrl))
-        {
-            <a class="btn btn-light btn-lg" href="@hero.ButtonUrl">@hero.ButtonText</a>
-        }
-    </div>
-</section>
+<partial name="_BannerSlider" model="Model.Content.Banners" />
 
 @foreach (var block in Model.Content.Blocks)
 {
@@ -30,10 +12,10 @@
 
 @if (Model.Services.Any())
 {
-    <section class="post-block">
+    <section class="post-block reveal">
         <div class="d-flex justify-content-between align-items-end mb-3">
-            <h2 class="h3 mb-0">Hizmetlerimiz</h2>
-            <a href="/hizmetler">Tümünü gör</a>
+            <h2 class="h3 section-title mb-0">Hizmetlerimiz</h2>
+            <a href="/hizmetler" class="fw-bold">Tümünü gör</a>
         </div>
         <div class="row row-cols-2 row-cols-lg-4 g-3">
             @foreach (var s in Model.Services)

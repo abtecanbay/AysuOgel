@@ -1,0 +1,23 @@
+﻿@model BeforeAfterFrame
+
+<div class="ba-frame">
+    @if (!string.IsNullOrWhiteSpace(Model.Url))
+    {
+        <a class="gallery-link" href="@Url.ImageUrl(Model.Url)" data-lightbox data-caption="@Model.Alt">
+            <img src="@Url.ImageUrl(Model.Url)" alt="@Model.Alt" class="media-img media-portrait" loading="lazy" />
+        </a>
+    }
+    else
+    {
+        <div class="media-placeholder portrait" role="img" aria-label="@Model.Label fotoğrafı için ayrılmış alan">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <circle cx="9" cy="9" r="2" />
+                <path d="m21 15-5-5L5 21" />
+            </svg>
+            <span class="small">Görsel eklenecek</span>
+        </div>
+    }
+    <span class="ba-label @(Model.IsAfter ? "after" : "")">@Model.Label</span>
+</div>
