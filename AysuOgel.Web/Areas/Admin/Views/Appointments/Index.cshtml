@@ -1,0 +1,92 @@
+﻿@model List<Appointment>
+@using System.Globalization
+@using AysuOgel.Web.Helpers
+@{
+    ViewData["Title"] = "Randevular";
+    var all = ViewData["All"] is true;
+    var tr = CultureInfo.GetCultureInfo("tr-TR");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Randevu Talepleri</h1>
+    <div class="btn-group">
+        <a asp-action="Index" asp-route-all="false"
+           class="btn btn-sm @(all ? "btn-outline-secondary" : "btn-secondary")">Yaklaşan</a>
+        <a asp-action="Index" asp-route-all="true"
+           class="btn btn-sm @(all ? "btn-secondary" : "btn-outline-secondary")">Tümü</a>
+    </div>
+</div>
+
+@if (TempData["AppointmentError"] is string err)
+{
+    <div class="alert alert-danger" role="alert">@err</div>
+}
+
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th>Randevu</th>
+            <th>Ad Soyad</th>
+            <th>Telefon</th>
+            <th>Durum</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.SlotStart.ToString("dd.MM.yyyy HH:mm") <span class="text-muted small">@a.SlotStart.ToString("dddd", tr)</span></td>
+                <td>
+                    <a asp-controller="Messages" asp-action="Details" asp-route-id="@a.ContactMessageId">
+                        @a.ContactMessage.FirstName @a.ContactMessage.LastName
+                    </a>
+                </td>
+                <td>@a.ContactMessage.Phone</td>
+                <td>
+                    @switch (a.Status)
+                    {
+                        case AppointmentStatus.Beklemede:
+                            <span class="badge bg-warning text-dark">@a.Status.DisplayName()</span>
+                            break;
+                        case AppointmentStatus.Onaylandi:
+                            <span class="badge bg-success">@a.Status.DisplayName()</span>
+                            break;
+                        default:
+                            <span class="badge bg-secondary">@a.Status.DisplayName()</span>
+                            break;
+                    }
+                </td>
+                <td class="text-end">
+                    @if (a.Status == AppointmentStatus.Beklemede)
+                    {
+                        <form asp-action="SetStatus" asp-route-id="@a.Id" asp-route-all="@all" method="post" class="d-inline">
+                            <input type="hidden" name="status" value="@((int)AppointmentStatus.Onaylandi)" />
+                            <button class="btn btn-sm btn-success">Onayla</button>
+                        </form>
+                    }
+                    @if (a.Status != AppointmentStatus.IptalEdildi)
+                    {
+                        <form asp-action="SetStatus" asp-route-id="@a.Id" asp-route-all="@all" method="post" class="d-inline"
+                              onsubmit="return confirm('Randevu iptal edilsin mi? Saat tekrar müsait olur.');">
+                            <input type="hidden" name="status" value="@((int)AppointmentStatus.IptalEdildi)" />
+                            <button class="btn btn-sm btn-outline-danger">İptal Et</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="SetStatus" asp-route-id="@a.Id" asp-route-all="@all" method="post" class="d-inline">
+                            <input type="hidden" name="status" value="@((int)AppointmentStatus.Beklemede)" />
+                            <button class="btn btn-sm btn-outline-secondary">Yeniden aç</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Randevu talebi yok.</p>
+}

@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>5772cd9c-b22b-4fbd-989b-7bd55f1c49bd</UserSecretsId>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -11,9 +12,10 @@
 		<ProjectReference Include="..\AysuOgel.DataAccess\AysuOgel.DataAccess.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
 	</ItemGroup>
 	
 </Project>

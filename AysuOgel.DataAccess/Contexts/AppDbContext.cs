@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
 
     public DbSet<Service> Services => Set<Service>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<AvailabilityWindow> AvailabilityWindows => Set<AvailabilityWindow>();
+    public DbSet<Appointment> Appointments => Set<Appointment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,5 +59,30 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => new { x.IsRead, x.CreatedAt });
         });
 
+        modelBuilder.Entity<AvailabilityWindow>(entity =>
+        {
+            entity.ToTable("AvailabilityWindows");
+            entity.HasKey(x => x.Id);
+
+            entity.HasIndex(x => new { x.Date, x.StartTime });
+        });
+
+        modelBuilder.Entity<Appointment>(entity =>
+        {
+            entity.ToTable("Appointments");
+            entity.HasKey(x => x.Id);
+
+            entity.HasOne(x => x.ContactMessage)
+                .WithMany()
+                .HasForeignKey(x => x.ContactMessageId)
+                .OnDelete(DeleteBehavior.Cascade);   // mesaj silinirse randevu da silinir, saat boşalır
+
+            // İptal edilmemiş her saat için tek kayıt: aynı saate çift randevuyu DB engeller.
+            entity.HasIndex(x => x.SlotStart)
+                .IsUnique()
+                .HasFilter($"[Status] <> {(int)AppointmentStatus.IptalEdildi}");
+
+            entity.HasIndex(x => new { x.Status, x.SlotStart });
+        });
     }
 }

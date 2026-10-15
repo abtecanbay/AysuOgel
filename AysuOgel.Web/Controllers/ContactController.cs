@@ -10,11 +10,16 @@ namespace AysuOgel.Web.Controllers;
 public class ContactController : Controller
 {
     private readonly IContactService _contacts;
+    private readonly IAppointmentService _appointments;
     private readonly IAppointmentSlotService _slots;
 
-    public ContactController(IContactService contacts, IAppointmentSlotService slots)
+    public ContactController(
+        IContactService contacts,
+        IAppointmentService appointments,
+        IAppointmentSlotService slots)
     {
         _contacts = contacts;
+        _appointments = appointments;
         _slots = slots;
     }
 
@@ -68,16 +73,27 @@ public class ContactController : Controller
 
         if (!ModelState.IsValid) return View(model);
 
-        await _contacts.CreateAsync(new ContactMessage
+        var message = new ContactMessage
         {
             FirstName = model.FirstName.Trim(),
             LastName = model.LastName.Trim(),
             Email = model.Email.Trim(),
             Phone = model.Phone.Trim(),
             Subject = model.Subject!.Value,
-            Message = model.Message.Trim(),
-            RequestedAppointmentAt = appointmentAt
-        });
+            Message = model.Message.Trim()
+        };
+
+        if (appointmentAt is null)
+        {
+            await _contacts.CreateAsync(message);
+        }
+        else if (!await _appointments.CreateRequestAsync(message, appointmentAt.Value))
+        {
+            // Kontrol ile kayıt arasında başka biri saati aldıysa.
+            ModelState.AddModelError(nameof(model.AppointmentSlot),
+                "Seçtiğiniz saat az önce doldu. Lütfen başka bir saat seçin.");
+            return View(model);
+        }
 
         TempData["ContactSuccess"] = SuccessText;
         return RedirectToAction(nameof(Index));

@@ -1,0 +1,26 @@
+﻿@model AvailabilityFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" class="form-control" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="SlotMinutes" class="form-label"></label>
+        <input asp-for="SlotMinutes" class="form-control" />
+        <span asp-validation-for="SlotMinutes" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="StartTime" class="form-label"></label>
+        <input asp-for="StartTime" class="form-control" />
+        <span asp-validation-for="StartTime" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="EndTime" class="form-label"></label>
+        <input asp-for="EndTime" class="form-control" />
+        <span asp-validation-for="EndTime" class="text-danger"></span>
+    </div>
+</div>

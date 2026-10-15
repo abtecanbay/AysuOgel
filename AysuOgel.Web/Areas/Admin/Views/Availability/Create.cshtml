@@ -1,0 +1,21 @@
+﻿@model AvailabilityFormViewModel
+@{
+    ViewData["Title"] = "Yeni Müsaitlik Aralığı";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<p class="text-muted">
+    Örnek: 17.10.2026, 10:00 - 17:00, 30 dk. Bitiş saati son randevunun bittiği saattir
+    (10:00 - 12:00 aralığında son randevu 11:30'da başlar).
+</p>
+
+<form asp-action="Create" method="post">
+    <partial name="_Form" model="Model" />
+    <button class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-link">İptal</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -17,7 +17,10 @@ builder.Services.AddScoped<IServicesPageService, StaticServicesPageService>();
 builder.Services.AddScoped<IHomePageService, StaticHomePageService>();
 builder.Services.AddScoped<IAboutPageService, StaticAboutPageService>();
 builder.Services.AddScoped<IContactService, ContactService>();
-builder.Services.AddScoped<IAppointmentSlotService, StaticAppointmentSlotService>();  
+builder.Services.AddScoped<IAppointmentSlotService, StaticAppointmentSlotService>();
+
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 
 builder.Services.AddRateLimiter(o =>
 {
