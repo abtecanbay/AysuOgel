@@ -1,0 +1,14 @@
+﻿@model ReplyFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="mb-3">
+    <label asp-for="Subject" class="form-label"></label>
+    <input asp-for="Subject" class="form-control" maxlength="200" />
+    <span asp-validation-for="Subject" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Body" class="form-label"></label>
+    <textarea asp-for="Body" class="form-control" rows="7" maxlength="4000"></textarea>
+    <span asp-validation-for="Body" class="text-danger"></span>
+</div>

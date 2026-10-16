@@ -127,6 +127,9 @@ namespace AysuOgel.DataAccess.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<DateTime?>("RepliedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("RequestedAppointmentAt")
                         .HasColumnType("datetime2");
 
@@ -138,6 +141,54 @@ namespace AysuOgel.DataAccess.Migrations
                     b.HasIndex("IsRead", "CreatedAt");
 
                     b.ToTable("ContactMessages", (string)null);
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MessageReply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("ContactMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DeliveryStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ToEmail")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactMessageId", "CreatedAt");
+
+                    b.HasIndex("DeliveryStatus", "CreatedAt");
+
+                    b.ToTable("MessageReplies", (string)null);
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.Service", b =>
@@ -185,6 +236,17 @@ namespace AysuOgel.DataAccess.Migrations
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.Appointment", b =>
+                {
+                    b.HasOne("AysuOgel.Entities.Entities.ContactMessage", "ContactMessage")
+                        .WithMany()
+                        .HasForeignKey("ContactMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContactMessage");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MessageReply", b =>
                 {
                     b.HasOne("AysuOgel.Entities.Entities.ContactMessage", "ContactMessage")
                         .WithMany()

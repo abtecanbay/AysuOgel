@@ -1,0 +1,18 @@
+﻿@model SortLinkModel
+@using Microsoft.AspNetCore.WebUtilities
+@{
+    var next = Model.Descending ? "asc" : "desc";
+
+    // Mevcut filtreleri koru, yalnızca Sort değerini değiştir.
+    var pairs = Context.Request.Query
+        .Where(kv => !string.Equals(kv.Key, "Sort", StringComparison.OrdinalIgnoreCase))
+        .SelectMany(kv => kv.Value.Select(v => new KeyValuePair<string, string?>(kv.Key, v)))
+        .ToList();
+    pairs.Add(new KeyValuePair<string, string?>("Sort", next));
+
+    var url = QueryHelpers.AddQueryString(Context.Request.Path.Value ?? "", pairs);
+}
+<a href="@url" class="text-decoration-none text-reset text-nowrap"
+   title="@(Model.Descending ? "Eskiden yeniye sırala" : "Yeniden eskiye sırala")">
+    @Model.Label <span aria-hidden="true">@(Model.Descending ? "▼" : "▲")</span>
+</a>

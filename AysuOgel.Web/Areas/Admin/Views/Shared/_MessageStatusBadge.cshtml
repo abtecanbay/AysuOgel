@@ -1,0 +1,15 @@
+﻿@model MessageStatus
+@using AysuOgel.Web.Helpers
+
+@switch (Model)
+{
+    case MessageStatus.Yeni:
+        <span class="badge bg-success">@Model.DisplayName()</span>
+        break;
+    case MessageStatus.Cevaplandi:
+        <span class="badge bg-primary">@Model.DisplayName()</span>
+        break;
+    default:
+        <span class="badge bg-secondary">@Model.DisplayName()</span>
+        break;
+}

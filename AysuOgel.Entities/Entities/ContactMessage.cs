@@ -10,6 +10,13 @@ public enum ContactSubject
     [Display(Name = "Diğer")] Diger = 4
 }
 
+public enum MessageStatus
+{
+    [Display(Name = "Yeni")] Yeni = 1,
+    [Display(Name = "Okundu")] Okundu = 2,
+    [Display(Name = "Cevaplandı")] Cevaplandi = 3
+}
+
 public class ContactMessage
 {
     public int Id { get; set; }
@@ -35,4 +42,13 @@ public class ContactMessage
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? RequestedAppointmentAt { get; set; }
+
+    /// <summary>İlk başarılı/kuyruklanmış yanıtın zamanı (UTC). Doluysa mesaj "Cevaplandı" sayılır.</summary>
+    public DateTime? RepliedAt { get; set; }
+
+    // Hesaplanan özellik, veritabanına yazılmaz. Sorgu içinde kullanma; RepliedAt/IsRead kullan.
+    public MessageStatus Status =>
+        RepliedAt != null ? MessageStatus.Cevaplandi :
+        IsRead ? MessageStatus.Okundu :
+        MessageStatus.Yeni;
 }

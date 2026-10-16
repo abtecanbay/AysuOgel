@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<AvailabilityWindow> AvailabilityWindows => Set<AvailabilityWindow>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<MessageReply> MessageReplies => Set<MessageReply>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,6 +66,25 @@ public class AppDbContext : DbContext
             entity.HasKey(x => x.Id);
 
             entity.HasIndex(x => new { x.Date, x.StartTime });
+        });
+
+        modelBuilder.Entity<MessageReply>(entity =>
+        {
+            entity.ToTable("MessageReplies");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.ToEmail).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Subject).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Body).HasMaxLength(4000).IsRequired();
+            entity.Property(x => x.ErrorMessage).HasMaxLength(500);
+
+            entity.HasOne(x => x.ContactMessage)
+                .WithMany()
+                .HasForeignKey(x => x.ContactMessageId)
+                .OnDelete(DeleteBehavior.Cascade);   // mesaj silinirse yanıtları da silinir
+
+            entity.HasIndex(x => new { x.ContactMessageId, x.CreatedAt });
+            entity.HasIndex(x => new { x.DeliveryStatus, x.CreatedAt });   // ileride bekleyenleri göndermek için
         });
 
         modelBuilder.Entity<Appointment>(entity =>

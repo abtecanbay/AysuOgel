@@ -1,4 +1,5 @@
 ﻿using AysuOgel.Business.Abstract;
+using AysuOgel.Business.Models;
 using AysuOgel.Entities.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,14 +13,14 @@ public class AppointmentsController : Controller
     private readonly IAppointmentService _appointments;
     public AppointmentsController(IAppointmentService appointments) => _appointments = appointments;
 
-    public async Task<IActionResult> Index(bool all = false)
+    public async Task<IActionResult> Index(AppointmentFilter filter)
     {
-        ViewData["All"] = all;
-        return View(await _appointments.GetAllAsync(upcomingOnly: !all));
+        ViewData["Filter"] = filter;
+        return View(await _appointments.GetAllAsync(filter));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> SetStatus(int id, AppointmentStatus status, bool all = false)
+    public async Task<IActionResult> SetStatus(int id, AppointmentStatus status, string? returnUrl = null)
     {
         if (!Enum.IsDefined(status)) return BadRequest();
 
@@ -28,6 +29,10 @@ public class AppointmentsController : Controller
             TempData["AppointmentError"] =
                 "Durum değiştirilemedi: kayıt bulunamadı ya da bu saat başka bir randevuda dolu.";
 
-        return RedirectToAction(nameof(Index), new { all });
+        // Filtreli listeye geri dön.
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return LocalRedirect(returnUrl);
+
+        return RedirectToAction(nameof(Index));
     }
 }

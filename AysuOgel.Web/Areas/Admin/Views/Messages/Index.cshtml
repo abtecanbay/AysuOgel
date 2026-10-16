@@ -1,15 +1,67 @@
 ﻿@model List<ContactMessage>
+@using AysuOgel.Business.Models
 @using AysuOgel.Web.Helpers
 @{
     ViewData["Title"] = "Mesajlar";
+    var f = ViewData["Filter"] as MessageFilter ?? new MessageFilter();
+    var hasFilter = f.Subject.HasValue
+        || !string.IsNullOrWhiteSpace(f.Name)
+        || !string.IsNullOrWhiteSpace(f.Phone)
+        || f.AppointmentFrom.HasValue
+        || f.AppointmentTo.HasValue;
 }
 
-<h1 class="h3 mb-3">Mesajlar</h1>
+<form method="get" asp-action="Index">
+    @if (!string.IsNullOrEmpty(f.Sort))
+    {
+        <input type="hidden" name="Sort" value="@f.Sort" />
+    }
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+        <h1 class="h3 mb-0">Mesajlar</h1>
+        <select name="Subject" class="form-select form-select-sm w-auto" aria-label="Konuya göre filtrele"
+                onchange="this.form.submit()">
+            <option value="">Tüm konular</option>
+            @foreach (var s in Enum.GetValues<ContactSubject>())
+            {
+                <option value="@((int)s)" selected="@(f.Subject == s)">@s.DisplayName()</option>
+            }
+        </select>
+    </div>
+
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-md-3">
+            <label class="form-label small mb-1" for="fName">Ad Soyad</label>
+            <input id="fName" name="Name" value="@f.Name" class="form-control form-control-sm" autocomplete="off" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fPhone">Telefon</label>
+            <input id="fPhone" name="Phone" value="@f.Phone" class="form-control form-control-sm" autocomplete="off" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fFrom">Randevu: başlangıç</label>
+            <input id="fFrom" type="date" name="AppointmentFrom" value="@f.AppointmentFrom?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fTo">Randevu: bitiş</label>
+            <input id="fTo" type="date" name="AppointmentTo" value="@f.AppointmentTo?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-sm btn-primary">Filtrele</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Temizle</a>
+        </div>
+    </div>
+</form>
+
+<p class="text-muted small">@Model.Count kayıt@(hasFilter ? " (filtreli)" : "")</p>
 
 <table class="table align-middle">
     <thead>
         <tr>
-            <th>Tarih</th>
+            <th aria-sort="@(f.Descending ? "descending" : "ascending")">
+                <partial name="_SortLink" model="@(new SortLinkModel("Tarih", f.Descending))" />
+            </th>
             <th>Ad Soyad</th>
             <th>Konu</th>
             <th>Telefon</th>
@@ -21,16 +73,13 @@
     <tbody>
         @foreach (var m in Model)
         {
-            <tr class="@(m.IsRead ? "" : "fw-bold")">
+            <tr class="@(m.Status == MessageStatus.Yeni ? "fw-bold" : "")">
                 <td>@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</td>
                 <td>@m.FirstName @m.LastName</td>
                 <td>@m.Subject.DisplayName()</td>
                 <td>@m.Phone</td>
                 <td>@(m.RequestedAppointmentAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
-                <td>
-                    @if (m.IsRead) { <span class="badge bg-secondary">Okundu</span> }
-                    else { <span class="badge bg-success">Yeni</span> }
-                </td>
+                <td><partial name="_MessageStatusBadge" model="m.Status" /></td>
                 <td class="text-end">
                     <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Görüntüle</a>
                 </td>
@@ -41,5 +90,5 @@
 
 @if (!Model.Any())
 {
-    <p class="text-muted">Henüz mesaj yok.</p>
+    <p class="text-muted">@(hasFilter ? "Filtreye uyan mesaj yok." : "Henüz mesaj yok.")</p>
 }

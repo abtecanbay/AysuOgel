@@ -1,39 +1,115 @@
-﻿@model ContactMessage
+﻿@model MessageDetailsViewModel
 @using AysuOgel.Web.Helpers
 @{
     ViewData["Title"] = "Mesaj";
-    var phoneDigits = new string(Model.Phone.Where(ch => char.IsDigit(ch) || ch == '+').ToArray());
+    var m = Model.Message;
+    var phoneDigits = new string(m.Phone.Where(ch => char.IsDigit(ch) || ch == '+').ToArray());
 }
 
-<h1 class="h3 mb-3">@Model.FirstName @Model.LastName</h1>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">@m.FirstName @m.LastName</h1>
+    <partial name="_MessageStatusBadge" model="m.Status" />
+</div>
 
 <dl class="row">
     <dt class="col-sm-3">Tarih</dt>
-    <dd class="col-sm-9">@Model.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</dd>
+    <dd class="col-sm-9">@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</dd>
 
     <dt class="col-sm-3">Konu</dt>
-    <dd class="col-sm-9">@Model.Subject.DisplayName()</dd>
+    <dd class="col-sm-9">@m.Subject.DisplayName()</dd>
 
-    @if (Model.RequestedAppointmentAt.HasValue)
-{
-    <dt class="col-sm-3">Talep edilen randevu</dt>
-    <dd class="col-sm-9 fw-bold">@Model.RequestedAppointmentAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
-}
+    @if (m.RequestedAppointmentAt.HasValue)
+    {
+        <dt class="col-sm-3">Talep edilen randevu</dt>
+        <dd class="col-sm-9 fw-bold">@m.RequestedAppointmentAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+    }
 
     <dt class="col-sm-3">E-posta</dt>
-    <dd class="col-sm-9"><a href="mailto:@Model.Email">@Model.Email</a></dd>
+    <dd class="col-sm-9"><a href="mailto:@m.Email">@m.Email</a></dd>
 
     <dt class="col-sm-3">Telefon</dt>
-    <dd class="col-sm-9"><a href="tel:@phoneDigits">@Model.Phone</a></dd>
+    <dd class="col-sm-9"><a href="tel:@phoneDigits">@m.Phone</a></dd>
 
     <dt class="col-sm-3">Mesaj</dt>
-    <dd class="col-sm-9" style="white-space: pre-line">@Model.Message</dd>
+    <dd class="col-sm-9" style="white-space: pre-line">@m.Message</dd>
 </dl>
+
+<hr />
+
+<h2 class="h5 mb-3">Yanıtlar</h2>
+
+@if (TempData["ReplyMessage"] is string replyMessage)
+{
+    <div class="alert alert-@(TempData["ReplyLevel"] ?? "info")" role="status">@replyMessage</div>
+}
+
+@foreach (var r in Model.Replies)
+{
+    <div class="card mb-2">
+        <div class="card-body">
+            <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+                <div>
+                    <strong>@r.Subject</strong>
+                    <div class="small text-muted">
+                        @r.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm") &middot; @r.ToEmail
+                    </div>
+                </div>
+                <div>
+                    @switch (r.DeliveryStatus)
+                    {
+                        case ReplyDeliveryStatus.Gonderildi:
+                            <span class="badge bg-success">@r.DeliveryStatus.DisplayName()</span>
+                            break;
+                        case ReplyDeliveryStatus.Hata:
+                            <span class="badge bg-danger">@r.DeliveryStatus.DisplayName()</span>
+                            break;
+                        default:
+                            <span class="badge bg-warning text-dark">@r.DeliveryStatus.DisplayName()</span>
+                            break;
+                    }
+                </div>
+            </div>
+            <div style="white-space: pre-line">@r.Body</div>
+            @if (!string.IsNullOrEmpty(r.ErrorMessage))
+            {
+                <div class="small text-danger mt-2">@r.ErrorMessage</div>
+            }
+        </div>
+    </div>
+}
+
+@if (!Model.Replies.Any())
+{
+    <p class="text-muted">Bu mesaja henüz yanıt yazılmadı.</p>
+}
+
+<h2 class="h5 mt-4 mb-3">Yanıt yaz</h2>
+
+@if (!Model.EmailConfigured)
+{
+    <div class="alert alert-warning small">
+        E-posta altyapısı henüz yapılandırılmadı. Yanıtınız kaydedilir ve "Gönderim bekliyor" olarak işaretlenir;
+        e-posta gönderilmez.
+    </div>
+}
+
+<p class="small text-muted">Alıcı: @m.Email</p>
+
+<form asp-action="Reply" asp-route-id="@m.Id" method="post">
+    <partial name="_ReplyFields" model="Model.Reply" />
+    <button class="btn btn-primary">Gönder</button>
+</form>
+
+<hr />
 
 <div class="d-flex gap-2">
     <a asp-action="Index" class="btn btn-outline-secondary">Listeye dön</a>
-    <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
-          onsubmit="return confirm('Bu mesaj silinsin mi?');">
+    <form asp-action="Delete" asp-route-id="@m.Id" method="post"
+          onsubmit="return confirm('Bu mesaj ve yanıtları silinsin mi?');">
         <button class="btn btn-outline-danger">Sil</button>
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

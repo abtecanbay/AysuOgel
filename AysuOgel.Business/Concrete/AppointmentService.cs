@@ -1,4 +1,5 @@
 ﻿using AysuOgel.Business.Abstract;
+using AysuOgel.Business.Models;
 using AysuOgel.DataAccess.Contexts;
 using AysuOgel.Entities.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -45,17 +46,43 @@ public class AppointmentService : IAppointmentService
         }
     }
 
-    public Task<List<Appointment>> GetAllAsync(bool upcomingOnly)
+    public Task<List<Appointment>> GetAllAsync(AppointmentFilter filter)
     {
         var query = _db.Appointments.AsNoTracking().Include(a => a.ContactMessage).AsQueryable();
 
-        if (upcomingOnly)
+        if (filter.Status is { } status)
+            query = query.Where(a => a.Status == status);
+
+        var name = FilterHelper.Clean(filter.Name);
+        if (name is not null)
+            query = query.Where(a => (a.ContactMessage.FirstName + " " + a.ContactMessage.LastName).Contains(name));
+
+        var phone = FilterHelper.PhoneDigits(filter.Phone);
+        if (phone is not null)
+            query = query.Where(a => a.ContactMessage.Phone
+                .Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "")
+                .Contains(phone));
+
+        var (from, toExclusive) = FilterHelper.DateRange(filter.From, filter.To);
+        if (from is { } f) query = query.Where(a => a.SlotStart >= f);
+        if (toExclusive is { } t) query = query.Where(a => a.SlotStart < t);
+
+        // Tarih aralığı yoksa ve "geçmişi göster" kapalıysa yalnızca bugünden itibaren olanlar.
+        if (from is null && toExclusive is null && !filter.All)
         {
             var since = DateTime.UtcNow.AddHours(3).Date;
-            return query.Where(a => a.SlotStart >= since).OrderBy(a => a.SlotStart).ToListAsync();
+            query = query.Where(a => a.SlotStart >= since);
         }
 
-        return query.OrderByDescending(a => a.SlotStart).ToListAsync();
+        query = filter.Descending
+        ? query.OrderByDescending(a => a.SlotStart).ThenByDescending(a => a.Id)
+        : query.OrderBy(a => a.SlotStart).ThenBy(a => a.Id);
+
+        //query = filter.All
+        //    ? query.OrderByDescending(a => a.SlotStart)
+        //    : query.OrderBy(a => a.SlotStart);
+
+        return query.ToListAsync();
     }
 
     public async Task<bool> SetStatusAsync(int id, AppointmentStatus status)
