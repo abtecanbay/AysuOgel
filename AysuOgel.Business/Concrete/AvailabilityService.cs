@@ -35,6 +35,20 @@ public class AvailabilityService : IAvailabilityService
         await _db.SaveChangesAsync();
     }
 
+    public async Task CreateRangeAsync(IReadOnlyCollection<AvailabilityWindow> windows)
+    {
+        if (windows.Count == 0) return;
+
+        var createdAt = DateTime.UtcNow;
+        foreach (var window in windows)
+            window.CreatedAt = createdAt;
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        _db.AvailabilityWindows.AddRange(windows);
+        await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
+
     public async Task UpdateAsync(AvailabilityWindow window)
     {
         var entity = await _db.AvailabilityWindows.FindAsync(window.Id);
