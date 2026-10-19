@@ -13,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<IServicesPageService, StaticServicesPageService>();
 builder.Services.AddScoped<IHomePageService, StaticHomePageService>();
 builder.Services.AddScoped<IAboutPageService, StaticAboutPageService>();

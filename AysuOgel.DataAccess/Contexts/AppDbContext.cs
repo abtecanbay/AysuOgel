@@ -15,10 +15,38 @@ public class AppDbContext : DbContext
     public DbSet<AvailabilityWindow> AvailabilityWindows => Set<AvailabilityWindow>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<MessageReply> MessageReplies => Set<MessageReply>();
+    public DbSet<Campaign> Campaigns => Set<Campaign>();
+    public DbSet<CampaignPageSettings> CampaignPageSettings => Set<CampaignPageSettings>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Campaign>(entity =>
+        {
+            entity.ToTable("Campaigns", table =>
+                table.HasCheckConstraint("CK_Campaigns_DateRange", "[EndDate] >= [StartDate]"));
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Title).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.ShortDescription).HasMaxLength(300);
+            entity.Property(x => x.Description).HasMaxLength(3000).IsRequired();
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.StartDate).HasColumnType("date").IsRequired();
+            entity.Property(x => x.EndDate).HasColumnType("date").IsRequired();
+
+            entity.HasIndex(x => new { x.IsActive, x.StartDate, x.EndDate, x.DisplayOrder });
+        });
+
+        modelBuilder.Entity<CampaignPageSettings>(entity =>
+        {
+            entity.ToTable("CampaignPageSettings");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
+            entity.Property(x => x.BannerImageUrl).HasMaxLength(1000);
+            entity.Property(x => x.IntroTitle).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.IntroText).HasMaxLength(1000).IsRequired();
+        });
 
         modelBuilder.Entity<Service>(entity =>
         {

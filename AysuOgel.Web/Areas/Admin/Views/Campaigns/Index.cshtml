@@ -1,0 +1,85 @@
+﻿@model List<Campaign>
+@{
+    ViewData["Title"] = "Kampanyalar";
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">İÇERİK YÖNETİMİ</p>
+        <h1 class="h3 mb-1">Kampanyalar</h1>
+        <p class="text-muted mb-0">Kampanya görsellerini, yayın durumunu ve geçerlilik tarihlerini yönetin.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="PageSettings" class="btn btn-outline-secondary">Banner ve açıklama</a>
+        <a asp-action="Create" class="btn btn-primary">+ Yeni Kampanya</a>
+    </div>
+</div>
+
+@if (TempData["CampaignSuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+
+<div class="card admin-table-card">
+    <div class="card-header bg-white border-0 px-4 pt-4">
+        <h2 class="h5 mb-1">Kampanya listesi</h2>
+        <p class="text-muted small mb-0">@Model.Count kayıt · süresi geçmiş kampanyalar burada görünmeye devam eder</p>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5 px-3">
+            <h3 class="h5">Henüz kampanya eklenmemiş</h3>
+            <p class="text-muted">İlk kampanyanızı oluşturarak başlayabilirsiniz.</p>
+            <a asp-action="Create" class="btn btn-primary">Kampanya ekle</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive px-3 pb-3">
+            <table class="table align-middle">
+                <thead><tr><th>Görsel</th><th>Kampanya</th><th>Başlangıç</th><th>Bitiş</th><th>Durum</th><th class="text-end">İşlemler</th></tr></thead>
+                <tbody>
+                @foreach (var campaign in Model)
+                {
+                    var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3));
+                    var inDateRange = campaign.StartDate <= today && campaign.EndDate >= today;
+                    <tr>
+                        <td><img src="@Url.ImageUrl(campaign.ImageUrl)" class="admin-table-thumb campaign-admin-thumb" alt="" loading="lazy" /></td>
+                        <td>
+                            <div class="fw-semibold">@campaign.Title</div>
+                            <div class="small text-muted">Sıra: @campaign.DisplayOrder</div>
+                        </td>
+                        <td class="text-nowrap">@campaign.StartDate.ToString("dd.MM.yyyy")</td>
+                        <td class="text-nowrap">@campaign.EndDate.ToString("dd.MM.yyyy")</td>
+                        <td>
+                            @if (!campaign.IsActive)
+                            {
+                                <span class="badge rounded-pill text-bg-secondary">Pasif</span>
+                            }
+                            else if (inDateRange)
+                            {
+                                <span class="badge rounded-pill text-bg-success">Yayında</span>
+                            }
+                            else if (campaign.StartDate > today)
+                            {
+                                <span class="badge rounded-pill text-bg-info">Başlamadı</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill text-bg-warning">Süresi doldu</span>
+                            }
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Edit" asp-route-id="@campaign.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                            <form asp-action="Delete" asp-route-id="@campaign.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bu kampanya silinsin mi?');">
+                                <button class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

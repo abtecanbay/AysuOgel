@@ -49,3 +49,7 @@
     .admin-main .table-responsive { border: 1px solid var(--admin-border); border-radius: 12px; }
     .admin-navbar .navbar-brand { font-size: .95rem; }
 }
+
+.campaign-admin-thumb { width: 48px; height: 60px; }
+.campaign-form-preview { width: min(100%, 300px); aspect-ratio: 4 / 5; object-fit: cover; }
+.campaign-banner-admin-preview { display: block; width: 100%; max-width: 640px; max-height: 260px; aspect-ratio: 16 / 6; border-radius: 12px; object-fit: cover; background: #eef3ef; }
