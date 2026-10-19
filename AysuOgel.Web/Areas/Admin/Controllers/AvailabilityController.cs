@@ -28,9 +28,8 @@ public class AvailabilityController : Controller
             DayOfWeek.Sunday => today.AddDays(1),
             _ => today
         };
-        var end = start.AddDays(5 - (int)start.DayOfWeek + (int)DayOfWeek.Monday - 1);
-        // Monday-Friday: end is the Friday of the selected week.
-        end = start.AddDays(DayOfWeek.Friday - start.DayOfWeek);
+        // Start is a weekday; end is Friday of that same week.
+        var end = start.AddDays((int)DayOfWeek.Friday - (int)start.DayOfWeek);
 
         return View(new AvailabilityFormViewModel
         {
