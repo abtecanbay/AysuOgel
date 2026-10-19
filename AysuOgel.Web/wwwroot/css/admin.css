@@ -53,3 +53,10 @@
 .campaign-admin-thumb { width: 48px; height: 60px; }
 .campaign-form-preview { width: min(100%, 300px); aspect-ratio: 4 / 5; object-fit: cover; }
 .campaign-banner-admin-preview { display: block; width: 100%; max-width: 640px; max-height: 260px; aspect-ratio: 16 / 6; border-radius: 12px; object-fit: cover; background: #eef3ef; }
+
+.availability-preset { display: flex; align-items: flex-start; gap: .85rem; padding: 1rem 1.1rem; border: 1px solid #cfe4d5; border-radius: 13px; background: #f3faf4; color: #294a37; }
+.availability-preset-icon { display: grid; place-items: center; flex: 0 0 34px; height: 34px; border-radius: 11px; background: #dcefe0; color: #315b49; font-weight: 800; }
+.availability-preset p { margin-top: .25rem; color: #62776a; line-height: 1.6; }
+.availability-weekdays-toggle { padding: 1rem 1rem 1rem 2.7rem; border: 1px solid var(--admin-border); border-radius: 12px; background: #fafcfb; }
+.availability-weekdays-toggle .form-check-input { margin-top: .28rem; }
+.availability-explainer { color: #596b60; line-height: 1.65; }
