@@ -3,13 +3,16 @@
     ViewData["Title"] = "Yeni Hizmet";
 }
 
-<h1 class="h3 mb-3">@ViewData["Title"]</h1>
-
-<form asp-action="Create" method="post">
-    <partial name="_Form" model="Model" />
-    <button class="btn btn-primary">Kaydet</button>
-    <a asp-action="Index" class="btn btn-link">İptal</a>
-</form>
+<div class="admin-page-heading">
+    <div><p class="admin-eyebrow mb-1">İÇERİK YÖNETİMİ</p><h1 class="h3 mb-0">@ViewData["Title"]</h1></div>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Hizmetlere dön</a>
+</div>
+<div class="card admin-form-card"><div class="card-body p-4">
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <partial name="_Form" model="Model" />
+        <div class="d-flex gap-2 mt-4"><button class="btn btn-primary px-4">Kaydet</button><a asp-action="Index" class="btn btn-outline-secondary">İptal</a></div>
+    </form>
+</div></div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
