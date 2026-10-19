@@ -1,10 +1,12 @@
-﻿using AysuOgel.Entities.Entities;
+﻿using AysuOgel.Business.Models;
+using AysuOgel.Entities.Entities;
 
 namespace AysuOgel.Business.Abstract;
 
 public interface IAvailabilityService
 {
-    Task<List<AvailabilityWindow>> GetUpcomingAsync();
+    Task<PagedResult<AvailabilityWindow>> GetPagedAsync(
+        DateOnly? startDate, DateOnly? endDate, int page, int pageSize);
     Task<AvailabilityWindow?> GetByIdAsync(int id);
     Task<bool> HasOverlapAsync(DateOnly date, TimeOnly start, TimeOnly end, int? excludeId = null);
     Task CreateAsync(AvailabilityWindow window);
