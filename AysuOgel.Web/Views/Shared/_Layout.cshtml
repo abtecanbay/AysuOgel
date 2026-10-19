@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AysuOgel</title>
+    <title>@ViewData["Title"] - Aysu Öğel Sağlıklı Yaşam</title>
     <script>document.documentElement.classList.add('js');</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,19 +35,10 @@
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav ms-auto gap-md-1 pt-3 pt-md-0">
-                    <li class="nav-item">
-                        <a class="nav-link @Active("Home")" asp-area="" asp-controller="Home" asp-action="Index">Anasayfa</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @Active("Services")" asp-area="" asp-controller="Services" asp-action="Index">Hizmetler</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @Active("About")" asp-area="" asp-controller="About" asp-action="Index">Hakkımızda</a>
-                    </li>
-                    @* Hakkımda ve İletişim sayfaları yazılınca buraya eklenecek *@
-                    <li class="nav-item">
-                        <a class="nav-link @Active("Contact")" asp-area="" asp-controller="Contact" asp-action="Index">İletişim</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link @Active("Home")" asp-area="" asp-controller="Home" asp-action="Index">Anasayfa</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("Services")" asp-area="" asp-controller="Services" asp-action="Index">Hizmetler</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("About")" asp-area="" asp-controller="About" asp-action="Index">Hakkımızda</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("Contact")" asp-area="" asp-controller="Contact" asp-action="Index">İletişim</a></li>
                     <li class="nav-item ms-md-2 mt-2 mt-md-0">
                         <a class="btn btn-brand" href="/iletisim?subject=RandevuTalebi">Randevu Talep Et</a>
                     </li>
@@ -61,12 +52,15 @@
     </main>
 
     <footer class="site-footer mt-5">
-        <div class="container d-flex flex-column flex-md-row justify-content-between gap-2 py-4">
+        <div class="container d-flex flex-column flex-md-row justify-content-between gap-3 py-4">
             <div>
                 <strong class="brand-text">AysuOgel</strong>
                 <div class="small">Çankaya, Ankara</div>
             </div>
-            <div class="small align-self-md-end">&copy; @DateTime.Now.Year AysuOgel</div>
+            <div class="small d-flex flex-wrap gap-3 align-items-center">
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">KVKK Aydınlatma Metni</a>
+                <span>&copy; @DateTime.Now.Year AysuOgel</span>
+            </div>
         </div>
     </footer>
 

@@ -3,29 +3,37 @@
     ViewData["Title"] = "Yönetici Girişi";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+<div class="admin-login-wrap">
+    <div class="admin-login-card">
+        <div class="admin-login-brand">
+            <span class="admin-brand-mark">A</span>
+            <div>
+                <h1 class="h4 mb-1">Yönetim Paneli</h1>
+                <p class="text-muted mb-0">Aysu Öğel Sağlıklı Yaşam</p>
+            </div>
+        </div>
+        <p class="text-muted mb-4">Devam etmek için yönetici hesabınızla giriş yapın.</p>
         <form asp-action="Login" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
             <input type="hidden" asp-for="ReturnUrl" />
 
             <div class="mb-3">
                 <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" autocomplete="username" />
-                <span asp-validation-for="Username" class="text-danger"></span>
+                <input asp-for="Username" class="form-control form-control-lg" autocomplete="username" autofocus />
+                <span asp-validation-for="Username" class="text-danger small"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <input asp-for="Password" class="form-control form-control-lg" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
-            <div class="form-check mb-3">
+            <div class="form-check mb-4">
                 <input asp-for="RememberMe" class="form-check-input" />
                 <label asp-for="RememberMe" class="form-check-label"></label>
             </div>
-            <button class="btn btn-primary w-100">Giriş Yap</button>
+            <button class="btn btn-admin-primary btn-lg w-100">Güvenli Giriş</button>
         </form>
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="admin-back-link">← Siteye dön</a>
     </div>
 </div>
 

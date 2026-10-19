@@ -2,9 +2,9 @@ using AysuOgel.Business.Abstract;
 using AysuOgel.Business.Concrete;
 using AysuOgel.DataAccess.Contexts;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,15 +13,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IServicesPageService, StaticServicesPageService>();  
+builder.Services.AddScoped<IServicesPageService, StaticServicesPageService>();
 builder.Services.AddScoped<IHomePageService, StaticHomePageService>();
 builder.Services.AddScoped<IAboutPageService, StaticAboutPageService>();
 builder.Services.AddScoped<IContactService, ContactService>();
-
 builder.Services.AddScoped<IAppointmentSlotService, DbAppointmentSlotService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
-
 builder.Services.AddScoped<IEmailSender, NotConfiguredEmailSender>();
 builder.Services.AddScoped<IMessageReplyService, MessageReplyService>();
 
@@ -34,16 +32,32 @@ builder.Services.AddRateLimiter(o =>
         await ctx.HttpContext.Response.WriteAsync(
             "Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.", ct);
     };
-    // Aynı IP'den 10 dakikada en fazla 5 form gönderimi
+
+    // Aynı IP'den iletişim formuna 10 dakikada en fazla 5 gönderim.
     o.AddPolicy("contact", http =>
         RateLimitPartition.GetFixedWindowLimiter(
             http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(10)
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    // Aynı IP'den yönetici girişine 15 dakikada en fazla 5 deneme.
+    o.AddPolicy("admin-login", http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(15),
+                QueueLimit = 0,
+                AutoReplenishment = true
             }));
 });
+
 builder.Services.AddControllersWithViews();
 
 builder.Services
@@ -52,6 +66,13 @@ builder.Services
     {
         o.LoginPath = "/Admin/Account/Login";
         o.AccessDeniedPath = "/Admin/Account/Login";
+        o.Cookie.Name = "__Host-AysuOgel.Admin";
+        o.Cookie.HttpOnly = true;
+        o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        o.Cookie.SameSite = SameSiteMode.Lax;
+        o.Cookie.Path = "/";
+        o.ExpireTimeSpan = TimeSpan.FromHours(8);
+        o.SlidingExpiration = true;
     });
 
 var app = builder.Build();
@@ -66,7 +87,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseRateLimiter();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

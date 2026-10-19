@@ -26,6 +26,7 @@ public class HomeController : Controller
         return View(vm);
     }
 
+    [HttpGet("/kvkk-aydinlatma")]
     public IActionResult Privacy() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
