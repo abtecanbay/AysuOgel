@@ -5,48 +5,61 @@
     var tr = CultureInfo.GetCultureInfo("tr-TR");
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Müsaitlik Aralıkları</h1>
-    <a asp-action="Create" class="btn btn-primary">Yeni Aralık</a>
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">RANDEVU TAKVİMİ</p>
+        <h1 class="h3 mb-1">Müsaitlik Aralıkları</h1>
+        <p class="text-muted mb-0">Ziyaretçilerin randevu alabileceği gün ve saatleri yönetin.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Müsaitlik ekle</a>
 </div>
 
-<p class="text-muted">
-    Yalnızca bugünden itibaren olan aralıklar gösterilir. Bir gün için birden fazla aralık ekleyebilirsiniz
-    (örneğin 10:00-12:00 ve 14:00-16:30). Tanımı olmayan günler için ziyaretçi randevu alamaz.
-</p>
-
-<table class="table align-middle">
-    <thead>
-        <tr>
-            <th>Tarih</th>
-            <th>Saat aralığı</th>
-            <th>Periyot</th>
-            <th>Randevu sayısı</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var w in Model)
-        {
-            var count = (int)((w.EndTime - w.StartTime).TotalMinutes / w.SlotMinutes);
-            <tr>
-                <td>@w.Date.ToString("dd.MM.yyyy dddd", tr)</td>
-                <td>@w.StartTime.ToString("HH:mm") - @w.EndTime.ToString("HH:mm")</td>
-                <td>@w.SlotMinutes dk</td>
-                <td>@count</td>
-                <td class="text-end">
-                    <a asp-action="Edit" asp-route-id="@w.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
-                    <form asp-action="Delete" asp-route-id="@w.Id" method="post" class="d-inline"
-                          onsubmit="return confirm('Bu aralık silinsin mi? Bu aralıktaki mevcut randevu talepleri silinmez ama yeni saat gösterilmez.');">
-                        <button class="btn btn-sm btn-outline-danger">Sil</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (!Model.Any())
+@if (TempData["AvailabilitySuccess"] is string success)
 {
-    <p class="text-muted">Henüz müsaitlik aralığı eklenmemiş.</p>
+    <div class="alert alert-success" role="status">@success</div>
 }
+
+<div class="alert alert-light border">
+    Birden fazla gün için aynı saatleri eklemek üzere <strong>Müsaitlik ekle</strong> seçeneğini kullanın.
+    Varsayılan seçim hafta içi 09.00–18.00 aralığıdır. Bir gün için birden fazla farklı saat aralığı da tanımlayabilirsiniz.
+</div>
+
+<div class="card admin-table-card">
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 px-3">
+            <h2 class="h5">Henüz müsaitlik aralığı eklenmemiş</h2>
+            <p class="text-muted">Takvime ilk müsaitlik aralığınızı ekleyin.</p>
+            <a asp-action="Create" class="btn btn-primary">Müsaitlik ekle</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive px-3 py-2">
+            <table class="table align-middle">
+                <thead>
+                    <tr><th>Tarih</th><th>Saat aralığı</th><th>Periyot</th><th>Randevu sayısı</th><th></th></tr>
+                </thead>
+                <tbody>
+                @foreach (var w in Model)
+                {
+                    var count = (int)((w.EndTime - w.StartTime).TotalMinutes / w.SlotMinutes);
+                    <tr>
+                        <td class="text-nowrap">@w.Date.ToString("dd.MM.yyyy dddd", tr)</td>
+                        <td class="text-nowrap">@w.StartTime.ToString("HH:mm") – @w.EndTime.ToString("HH:mm")</td>
+                        <td>@w.SlotMinutes dk</td>
+                        <td>@count</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Edit" asp-route-id="@w.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                            <form asp-action="Delete" asp-route-id="@w.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bu aralık silinsin mi? Bu aralıktaki mevcut randevu talepleri silinmez ama yeni saat gösterilmez.');">
+                                <button class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
