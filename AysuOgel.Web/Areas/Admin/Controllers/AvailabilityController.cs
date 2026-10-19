@@ -31,18 +31,11 @@ public class AvailabilityController : Controller
             PageSize = pageSize
         };
 
-        var queryStartDate = startDate;
-        var queryEndDate = endDate;
-
         if (startDate.HasValue && endDate.HasValue && startDate.Value > endDate.Value)
-        {
             ModelState.AddModelError(string.Empty, "Başlangıç tarihi, bitiş tarihinden sonra olamaz.");
-            queryStartDate = null;
-            queryEndDate = null;
-        }
 
         var result = await _availability.GetPagedAsync(
-            queryStartDate, queryEndDate, model.Page, model.PageSize);
+            startDate, endDate, model.Page, model.PageSize);
 
         model.Items = result.Items;
         model.Page = result.Page;
