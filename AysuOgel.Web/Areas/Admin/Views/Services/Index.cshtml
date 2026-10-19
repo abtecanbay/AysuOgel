@@ -49,7 +49,10 @@
                         </td>
                         <td class="text-muted">@s.ShortDescription</td>
                         <td>
-                            @if (s.IsActive) { <span class="badge rounded-pill text-bg-success-subtle border border-success-subtle">Aktif</span> }
+                                @if (s.IsActive)
+                                {
+                                    <span class="badge rounded-pill text-bg-success">Aktif</span>
+                                }
                             else { <span class="badge rounded-pill text-bg-secondary">Pasif</span> }
                         </td>
                         <td class="text-end text-nowrap">

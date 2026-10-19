@@ -19,7 +19,7 @@ public class CampaignService : ICampaignService
         return _db.Campaigns.AsNoTracking()
             .Where(x => x.IsActive && x.StartDate <= today && x.EndDate >= today)
             .OrderBy(x => x.DisplayOrder)
-            .ThenBy(x => x.StartDate)
+            .ThenBy(x => x.EndDate)
             .ToListAsync();
     }
 

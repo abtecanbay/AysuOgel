@@ -21,9 +21,9 @@ public class Campaign : IValidatableObject
     public string Description { get; set; } = string.Empty;
 
     [Display(Name = "Kampanya görseli")]
-    [Required(ErrorMessage = "Kampanya görseli zorunludur.")]
+    //[Required(ErrorMessage = "Kampanya görseli zorunludur.")]
     [MaxLength(1000)]
-    public string ImageUrl { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; } = string.Empty;
 
     [Display(Name = "Başlangıç tarihi")]
     public DateOnly StartDate { get; set; }
