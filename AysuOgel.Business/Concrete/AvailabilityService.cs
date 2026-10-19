@@ -1,4 +1,5 @@
 ﻿using AysuOgel.Business.Abstract;
+using AysuOgel.Business.Models;
 using AysuOgel.DataAccess.Contexts;
 using AysuOgel.Entities.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +11,30 @@ public class AvailabilityService : IAvailabilityService
     private readonly AppDbContext _db;
     public AvailabilityService(AppDbContext db) => _db = db;
 
-    public Task<List<AvailabilityWindow>> GetUpcomingAsync()
+    public Task<PagedResult<AvailabilityWindow>> GetPagedAsync(
+        DateOnly? startDate, DateOnly? endDate, int page, int pageSize)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3));
-        return _db.AvailabilityWindows.AsNoTracking()
-            .Where(w => w.Date >= today)
-            .OrderBy(w => w.Date).ThenBy(w => w.StartTime)
-            .ToListAsync();
+        var query = _db.AvailabilityWindows.AsNoTracking();
+
+        if (startDate.HasValue || endDate.HasValue)
+        {
+            if (startDate.HasValue)
+                query = query.Where(w => w.Date >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(w => w.Date <= endDate.Value);
+        }
+        else
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3));
+            query = query.Where(w => w.Date >= today);
+        }
+
+        return query
+            .OrderBy(w => w.Date)
+            .ThenBy(w => w.StartTime)
+            .ThenBy(w => w.Id)
+            .ToPagedAsync(page, pageSize);
     }
 
     public Task<AvailabilityWindow?> GetByIdAsync(int id) =>
