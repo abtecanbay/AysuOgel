@@ -925,3 +925,142 @@ a {
     font-weight: 700;
     color: var(--c-primary-dark);
 }
+
+/* ---- Kampanyalar sayfası: tek banner + Instagram portre kartları ---- */
+.campaign-hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    min-height: clamp(250px, 31vw, 390px);
+    margin-top: .5rem;
+    margin-bottom: 3rem;
+    overflow: hidden;
+    border-radius: 1.75rem;
+    background: var(--grad-dark);
+    box-shadow: var(--shadow-soft);
+}
+.campaign-hero-image,
+.campaign-hero-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.campaign-hero-image { z-index: -2; object-fit: cover; object-position: center; }
+.campaign-hero-overlay {
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(6, 62, 72, .86) 0%, rgba(6, 62, 72, .62) 48%, rgba(6, 62, 72, .12) 100%);
+}
+.campaign-hero-no-image .campaign-hero-overlay {
+    background: linear-gradient(120deg, #086b6b, #1b6fb5);
+}
+.campaign-hero-content {
+    width: min(100%, 780px);
+    padding: clamp(1.5rem, 6vw, 4.5rem);
+    color: #fff;
+}
+.campaign-hero-content h1 {
+    margin-bottom: .8rem;
+    color: #fff;
+    font-size: clamp(2rem, 4.2vw, 3.4rem);
+    line-height: 1.12;
+}
+.campaign-hero-content p:not(.campaign-eyebrow) {
+    max-width: 620px;
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    line-height: 1.75;
+    color: rgba(255,255,255,.94);
+    white-space: pre-line;
+}
+.campaign-eyebrow,
+.campaign-section-eyebrow {
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+.campaign-eyebrow { color: #c8f4df; margin-bottom: .8rem; }
+.campaign-section-eyebrow { color: var(--c-primary-dark); }
+.campaign-list-section { margin-bottom: 4rem; }
+.campaign-grid { align-items: stretch; }
+.campaign-card {
+    overflow: hidden;
+    border: 1px solid rgba(11, 138, 124, .1);
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+    transition: transform .2s, box-shadow .2s;
+}
+.campaign-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 40px rgba(11, 138, 124, .17);
+}
+.campaign-card-image-wrap {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #eafaf6, #e3f1fb);
+}
+.campaign-card-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform .35s;
+}
+.campaign-card:hover .campaign-card-image { transform: scale(1.025); }
+.campaign-date-badge {
+    position: absolute;
+    left: .85rem;
+    right: .85rem;
+    bottom: .85rem;
+    width: fit-content;
+    max-width: calc(100% - 1.7rem);
+    padding: .4rem .75rem;
+    border: 1px solid rgba(255,255,255,.6);
+    border-radius: 999px;
+    background: rgba(255,255,255,.94);
+    color: var(--c-primary-dark);
+    font-size: .75rem;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+.campaign-card-body { padding: 1.25rem 1.25rem 1.5rem; }
+.campaign-card-title { margin-bottom: .6rem; line-height: 1.25; }
+.campaign-card-lead {
+    margin-bottom: .8rem;
+    color: var(--c-primary-dark);
+    font-weight: 800;
+    line-height: 1.55;
+}
+.campaign-card-description {
+    color: var(--c-muted);
+    line-height: 1.75;
+    white-space: pre-line;
+}
+.campaign-empty-state {
+    display: grid;
+    justify-items: center;
+    padding: clamp(2rem, 6vw, 4rem) 1.25rem;
+    border: 1px dashed #b9ddd3;
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, #f4fcf9, #f4f9ff);
+    text-align: center;
+}
+.campaign-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 1rem;
+    border-radius: 18px;
+    background: var(--c-mint);
+    color: var(--c-primary-dark);
+    font-size: 1.6rem;
+}
+@media (max-width: 575.98px) {
+    .campaign-hero { min-height: 260px; border-radius: 1.25rem; margin-bottom: 2.25rem; }
+    .campaign-hero-overlay { background: linear-gradient(0deg, rgba(6,62,72,.85), rgba(6,62,72,.38)); }
+    .campaign-hero-content { padding: 1.5rem; }
+    .campaign-date-badge { left: .6rem; bottom: .6rem; max-width: calc(100% - 1.2rem); font-size: .68rem; }
+    .campaign-card-body { padding: 1rem 1rem 1.25rem; }
+}
