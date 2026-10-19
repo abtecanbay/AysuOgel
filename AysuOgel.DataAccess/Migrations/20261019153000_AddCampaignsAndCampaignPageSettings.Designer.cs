@@ -241,7 +241,7 @@ namespace AysuOgel.DataAccess.Migrations
 
                     b.HasIndex("IsActive", "StartDate", "EndDate", "DisplayOrder");
 
-                    b.ToTable("Campaigns", (string)null);
+                    b.ToTable("Campaigns", t => t.HasCheckConstraint("CK_Campaigns_DateRange", "[EndDate] >= [StartDate]"));
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.CampaignPageSettings", b =>
