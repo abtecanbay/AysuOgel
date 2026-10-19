@@ -34,7 +34,17 @@
 .admin-login-brand .admin-brand-mark { width: 48px; height: 48px; border-radius: 15px; font-size: 1.35rem; }
 .admin-back-link { display: inline-block; margin-top: 1.5rem; color: var(--admin-green); text-decoration: none; font-weight: 600; }
 .admin-back-link:hover { text-decoration: underline; }
+.admin-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.admin-eyebrow { color: #688174; font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+.admin-table-card { overflow: hidden; }
+.admin-order-chip { display: inline-grid; place-items: center; min-width: 32px; height: 32px; padding: 0 .4rem; border-radius: 10px; background: #edf3ee; color: var(--admin-green); font-weight: 700; }
+.admin-table-thumb { width: 54px; height: 46px; border-radius: 10px; object-fit: cover; background: #eef3ef; }
+.admin-table-thumb-empty { display: inline-grid; place-items: center; color: #7d9587; font-size: 1.4rem; }
+.admin-form-card { max-width: 1050px; }
+.admin-image-upload-panel { padding: 1.1rem; border: 1px dashed #b8cabe; border-radius: 13px; background: #f7faf7; }
+.admin-image-preview { display: block; width: 100%; max-width: 320px; max-height: 210px; border-radius: 11px; object-fit: cover; background: #eef3ef; }
 @media (max-width: 767.98px) {
+    .admin-page-heading { align-items: flex-start; flex-direction: column; }
     .admin-main .table { min-width: 650px; }
     .admin-main .table-responsive { border: 1px solid var(--admin-border); border-radius: 12px; }
     .admin-navbar .navbar-brand { font-size: .95rem; }
