@@ -1,33 +1,53 @@
 ﻿@model Service
 
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<div class="mb-3">
-    <label asp-for="Name" class="form-label"></label>
-    <input asp-for="Name" class="form-control" />
-    <span asp-validation-for="Name" class="text-danger"></span>
-</div>
-<div class="mb-3">
-    <label asp-for="ShortDescription" class="form-label"></label>
-    <input asp-for="ShortDescription" class="form-control" />
-    <span asp-validation-for="ShortDescription" class="text-danger"></span>
-</div>
-<div class="mb-3">
-    <label asp-for="Description" class="form-label"></label>
-    <textarea asp-for="Description" class="form-control" rows="6"></textarea>
-    <span asp-validation-for="Description" class="text-danger"></span>
-</div>
-<div class="mb-3">
-    <label asp-for="ImageUrl" class="form-label"></label>
-    <input asp-for="ImageUrl" class="form-control" />
-    <span asp-validation-for="ImageUrl" class="text-danger"></span>
-</div>
-<div class="mb-3">
-    <label asp-for="DisplayOrder" class="form-label"></label>
-    <input asp-for="DisplayOrder" class="form-control" />
-    <span asp-validation-for="DisplayOrder" class="text-danger"></span>
-</div>
-<div class="form-check mb-3">
-    <input asp-for="IsActive" class="form-check-input" />
-    <label asp-for="IsActive" class="form-check-label"></label>
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ShortDescription" class="form-label"></label>
+            <input asp-for="ShortDescription" class="form-control" />
+            <span asp-validation-for="ShortDescription" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="admin-image-upload-panel">
+            <label class="form-label fw-semibold" for="imageFile">Hizmet görseli yükle</label>
+            <input id="imageFile" name="imageFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+            <div class="form-text">JPG, PNG veya WEBP · en fazla 5 MB. Yüklenen dosya, aşağıdaki görsel adresinin yerine kullanılır.</div>
+            @Html.ValidationMessage("ImageFile", null, new { @class = "text-danger small d-block mt-2" })
+            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+            {
+                <div class="mt-3">
+                    <p class="small text-muted mb-2">Mevcut görsel</p>
+                    <img src="@Url.ImageUrl(Model.ImageUrl)" class="admin-image-preview" alt="Mevcut hizmet görseli" />
+                </div>
+            }
+        </div>
+        <div class="mt-3">
+            <label asp-for="ImageUrl" class="form-label"></label>
+            <input asp-for="ImageUrl" class="form-control" placeholder="https://... veya uploads/dosya.jpg" />
+            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            <div class="form-text">Dosya yüklemiyorsanız mevcut URL alanını kullanabilirsiniz.</div>
+        </div>
+        <div class="mt-3">
+            <label asp-for="DisplayOrder" class="form-label"></label>
+            <input asp-for="DisplayOrder" class="form-control" type="number" />
+            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+        </div>
+        <div class="form-check mt-3">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label"></label>
+        </div>
+    </div>
 </div>
