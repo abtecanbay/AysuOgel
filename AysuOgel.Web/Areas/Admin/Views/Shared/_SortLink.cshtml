@@ -5,7 +5,8 @@
 
     // Mevcut filtreleri koru, yalnızca Sort değerini değiştir.
     var pairs = Context.Request.Query
-        .Where(kv => !string.Equals(kv.Key, "Sort", StringComparison.OrdinalIgnoreCase))
+        .Where(kv => !string.Equals(kv.Key, "Sort", StringComparison.OrdinalIgnoreCase)
+          && !string.Equals(kv.Key, "Page", StringComparison.OrdinalIgnoreCase))
         .SelectMany(kv => kv.Value.Select(v => new KeyValuePair<string, string?>(kv.Key, v)))
         .ToList();
     pairs.Add(new KeyValuePair<string, string?>("Sort", next));

@@ -1,4 +1,4 @@
-﻿@model List<Appointment>
+﻿@model PagedResult<Appointment>
 @using System.Globalization
 @using AysuOgel.Business.Models
 @using AysuOgel.Web.Helpers
@@ -19,6 +19,7 @@
     @if (!string.IsNullOrEmpty(f.Sort))
     {
         <input type="hidden" name="Sort" value="@f.Sort" />
+        <input type="hidden" name="PageSize" value="@f.PageSize" />
     }
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
         <h1 class="h3 mb-0">Randevu Talepleri</h1>
@@ -63,10 +64,7 @@
     </div>
 </form>
 
-<p class="text-muted small">
-    @Model.Count kayıt@(hasFilter ? " (filtreli)" : "").
-    Tarih aralığı seçilmezse bugünden itibaren olan randevular listelenir.
-</p>
+<p class="text-muted small">@Model.TotalCount kayıt@(hasFilter ? " (filtreli)" : "")</p>
 
 @if (TempData["AppointmentError"] is string err)
 {
@@ -86,7 +84,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var a in Model)
+        @foreach (var a in Model.Items)
         {
             <tr>
                 <td>@a.SlotStart.ToString("dd.MM.yyyy HH:mm") <span class="text-muted small">@a.SlotStart.ToString("dddd", tr)</span></td>
@@ -142,7 +140,9 @@
     </tbody>
 </table>
 
-@if (!Model.Any())
+<partial name="_Pager" model="Model" />
+
+@if (Model.TotalCount == 0)
 {
-    <p class="text-muted">@(hasFilter ? "Filtreye uyan randevu yok." : "Randevu talebi yok.")</p>
+    <p class="text-muted">@(hasFilter ? "Filtreye uyan mesaj yok." : "Henüz mesaj yok.")</p>
 }

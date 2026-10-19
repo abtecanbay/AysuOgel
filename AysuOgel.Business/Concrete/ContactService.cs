@@ -19,40 +19,35 @@ public class ContactService : IContactService
         await _db.SaveChangesAsync();
     }
 
-    public Task<List<ContactMessage>> GetAllAsync(MessageFilter? filter = null)
+    public Task<PagedResult<ContactMessage>> GetAllAsync(MessageFilter? filter = null)
     {
+        filter ??= new MessageFilter();
         var query = _db.ContactMessages.AsNoTracking().AsQueryable();
 
-        if (filter is not null)
-        {
-            if (filter.Subject is { } subject)
-                query = query.Where(x => x.Subject == subject);
+        if (filter.Subject is { } subject)
+            query = query.Where(x => x.Subject == subject);
 
-            var name = FilterHelper.Clean(filter.Name);
-            if (name is not null)
-                query = query.Where(x => (x.FirstName + " " + x.LastName).Contains(name));
+        var name = FilterHelper.Clean(filter.Name);
+        if (name is not null)
+            query = query.Where(x => (x.FirstName + " " + x.LastName).Contains(name));
 
-            var phone = FilterHelper.PhoneDigits(filter.Phone);
-            if (phone is not null)
-                query = query.Where(x => x.Phone
-                    .Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "")
-                    .Contains(phone));
+        var phone = FilterHelper.PhoneDigits(filter.Phone);
+        if (phone is not null)
+            query = query.Where(x => x.Phone
+                .Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "")
+                .Contains(phone));
 
-            var (from, toExclusive) = FilterHelper.DateRange(filter.AppointmentFrom, filter.AppointmentTo);
-            if (from is { } f)
-                query = query.Where(x => x.RequestedAppointmentAt != null && x.RequestedAppointmentAt >= f);
-            if (toExclusive is { } t)
-                query = query.Where(x => x.RequestedAppointmentAt != null && x.RequestedAppointmentAt < t);
-        }
+        var (from, toExclusive) = FilterHelper.DateRange(filter.AppointmentFrom, filter.AppointmentTo);
+        if (from is { } f)
+            query = query.Where(x => x.RequestedAppointmentAt != null && x.RequestedAppointmentAt >= f);
+        if (toExclusive is { } t)
+            query = query.Where(x => x.RequestedAppointmentAt != null && x.RequestedAppointmentAt < t);
 
-        var descending = filter?.Descending ?? true;
-        query = descending
+        query = filter.Descending
             ? query.OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id)
             : query.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id);
 
-        return query.ToListAsync();
-
-        //return query.OrderByDescending(x => x.CreatedAt).ToListAsync();
+        return query.ToPagedAsync(filter.Page, filter.PageSize);
     }
 
     public Task<ContactMessage?> GetByIdAsync(int id) =>

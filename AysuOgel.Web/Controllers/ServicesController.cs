@@ -22,4 +22,12 @@ public class ServicesController : Controller
             Content = await _page.GetAsync(),
             Services = await _services.GetActiveAsync()
         });
+
+    [HttpGet("hizmetler/{id:int}")]
+    public async Task<IActionResult> Details(int id)
+    {
+        var service = await _services.GetByIdAsync(id);
+        if (service is null || !service.IsActive) return NotFound();
+        return View(service);
+    }
 }

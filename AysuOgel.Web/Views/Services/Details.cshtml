@@ -1,0 +1,46 @@
+﻿@model Service
+@using AysuOgel.Entities.Entities
+@{
+    ViewData["Title"] = Model.Name;
+    var hasImage = !string.IsNullOrWhiteSpace(Model.ImageUrl);
+}
+
+<p class="mb-3 small"><a href="/hizmetler" class="fw-bold">← Tüm hizmetler</a></p>
+
+<section class="page-head reveal">
+    <h1 class="display-6 fw-bold section-title">@Model.Name</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+    {
+        <p class="lead mb-0">@Model.ShortDescription</p>
+    }
+</section>
+
+<section class="post-block reveal">
+    <div class="row align-items-start g-4">
+        @if (hasImage)
+        {
+            <div class="col-md-6">
+                <a class="gallery-link" href="@Url.ImageUrl(Model.ImageUrl)" data-lightbox data-caption="@Model.Name">
+                    <img src="@Url.ImageUrl(Model.ImageUrl)" alt="@Model.Name" class="media-img shadow-sm" />
+                </a>
+            </div>
+        }
+        <div class="@(hasImage ? "col-md-6" : "col-lg-8")">
+            <h2 class="h4 section-title">Hizmet hakkında</h2>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p class="post-text">@Model.Description</p>
+            }
+            else
+            {
+                <p class="post-text">Bu hizmet hakkında ayrıntılı bilgi için bizimle iletişime geçebilirsiniz.</p>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="cta-band reveal">
+    <h2 class="h4 mb-2">Bu hizmet için randevu planlayalım</h2>
+    <p class="mb-3">Formu doldurun, size dönüş yapalım.</p>
+    <a class="btn btn-banner btn-lg" href="/iletisim?subject=RandevuTalebi">Randevu talep et</a>
+</section>

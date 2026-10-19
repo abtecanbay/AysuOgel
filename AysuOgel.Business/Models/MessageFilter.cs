@@ -2,7 +2,7 @@
 
 namespace AysuOgel.Business.Models;
 
-public class MessageFilter
+public class MessageFilter : PagedFilter
 {
     public ContactSubject? Subject { get; set; }
     public string? Name { get; set; }

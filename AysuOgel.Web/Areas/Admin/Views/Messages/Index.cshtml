@@ -1,4 +1,4 @@
-﻿@model List<ContactMessage>
+﻿@model PagedResult<ContactMessage>
 @using AysuOgel.Business.Models
 @using AysuOgel.Web.Helpers
 @{
@@ -15,6 +15,7 @@
     @if (!string.IsNullOrEmpty(f.Sort))
     {
         <input type="hidden" name="Sort" value="@f.Sort" />
+        <input type="hidden" name="PageSize" value="@f.PageSize" />
     }
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
         <h1 class="h3 mb-0">Mesajlar</h1>
@@ -54,7 +55,7 @@
     </div>
 </form>
 
-<p class="text-muted small">@Model.Count kayıt@(hasFilter ? " (filtreli)" : "")</p>
+<p class="text-muted small">@Model.TotalCount kayıt@(hasFilter ? " (filtreli)" : "")</p>
 
 <table class="table align-middle">
     <thead>
@@ -71,7 +72,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var m in Model)
+        @foreach (var m in Model.Items)
         {
             <tr class="@(m.Status == MessageStatus.Yeni ? "fw-bold" : "")">
                 <td>@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</td>
@@ -88,7 +89,9 @@
     </tbody>
 </table>
 
-@if (!Model.Any())
+<partial name="_Pager" model="Model" />
+
+@if (Model.TotalCount == 0)
 {
     <p class="text-muted">@(hasFilter ? "Filtreye uyan mesaj yok." : "Henüz mesaj yok.")</p>
 }

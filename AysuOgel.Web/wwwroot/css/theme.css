@@ -811,3 +811,117 @@ a {
         color: #b3c2c5;
         cursor: not-allowed;
     }
+
+/* ---- Kart kaydırıcı (Hizmetler) ---- */
+.card-slider {
+    position: relative;
+    --gap: 1.5rem;
+    --per-view: 1.15; /* mobilde sıradaki kartın ucu görünsün */
+}
+
+@media (min-width: 768px) {
+    .card-slider {
+        --per-view: 2;
+    }
+}
+
+@media (min-width: 992px) {
+    .card-slider {
+        --per-view: 3;
+    }
+}
+
+.slider-track {
+    display: flex;
+    gap: var(--gap);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: .5rem;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    /* kart gölgesi ve hover yükselmesi kesilmesin */
+    padding: .5rem .5rem 1.5rem;
+    margin: 0 -.5rem;
+}
+
+    .slider-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .slider-track:focus-visible {
+        outline: 3px solid var(--c-blue);
+        outline-offset: 2px;
+        border-radius: var(--radius);
+    }
+
+.slider-item {
+    flex: 0 0 calc((100% - (var(--per-view) - 1) * var(--gap)) / var(--per-view));
+    scroll-snap-align: start;
+    min-width: 0;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: calc(50% - .75rem);
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--c-primary-dark);
+    box-shadow: 0 6px 18px rgba(11, 138, 124, .25);
+    transition: background .15s, color .15s, opacity .15s;
+}
+
+    .slider-arrow.prev {
+        left: -1.25rem;
+    }
+
+    .slider-arrow.next {
+        right: -1.25rem;
+    }
+
+    .slider-arrow:not(:disabled):hover {
+        background: var(--c-primary);
+        color: #fff;
+    }
+
+    .slider-arrow:disabled {
+        opacity: .35;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+.card-slider.no-scroll .slider-arrow {
+    display: none;
+}
+
+@media (max-width: 575.98px) {
+    .slider-arrow {
+        display: none;
+    }
+    /* mobilde kaydırma yeterli */
+}
+
+/* Hizmet kartı (tıklanabilir) */
+.service-card,
+.service-card:hover {
+    color: inherit;
+}
+
+    .service-card .card-text {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+.service-more {
+    padding-top: .5rem;
+    font-weight: 700;
+    color: var(--c-primary-dark);
+}

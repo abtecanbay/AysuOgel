@@ -20,8 +20,8 @@
         <div class="row row-cols-2 row-cols-lg-4 g-3">
             @foreach (var s in Model.Services)
             {
-                <div class="col">
-                    <div class="card h-100">
+                <a class="col">
+                    <a asp-controller="Services" asp-action="Details" asp-route-id="@s.Id" class="card service-card h-100 text-decoration-none">
                         @if (!string.IsNullOrEmpty(s.ImageUrl))
                         {
                             <img src="@Url.ImageUrl(s.ImageUrl)" class="card-img-top media-img" alt="@s.Name" loading="lazy" />
@@ -30,8 +30,8 @@
                             <h3 class="h6 card-title">@s.Name</h3>
                             <p class="card-text small text-muted">@s.ShortDescription</p>
                         </div>
-                    </div>
-                </div>
+                    </a>
+                </a>
             }
         </div>
     </section>

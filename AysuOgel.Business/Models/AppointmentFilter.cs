@@ -2,7 +2,7 @@
 
 namespace AysuOgel.Business.Models;
 
-public class AppointmentFilter
+public class AppointmentFilter : PagedFilter
 {
     public AppointmentStatus? Status { get; set; }
     public string? Name { get; set; }

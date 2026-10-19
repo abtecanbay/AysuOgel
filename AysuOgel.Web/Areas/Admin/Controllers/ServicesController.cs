@@ -23,6 +23,7 @@ public class ServicesController : Controller
     public async Task<IActionResult> Index() =>
         View(await _services.GetAllAsync());
 
+    
     public IActionResult Create() => View(new Service());
 
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(MaxImageBytes + 256 * 1024)]

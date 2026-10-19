@@ -1,0 +1,69 @@
+﻿@model IPagedResult
+@using Microsoft.AspNetCore.WebUtilities
+@using AysuOgel.Business.Models
+@{
+    // Mevcut filtreleri koru; Page ve PageSize'ı yeniden kur.
+    string Link(int page, int size)
+    {
+        var pairs = Context.Request.Query
+            .Where(kv => !string.Equals(kv.Key, "Page", StringComparison.OrdinalIgnoreCase)
+                      && !string.Equals(kv.Key, "PageSize", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(kv => kv.Value.Select(v => new KeyValuePair<string, string?>(kv.Key, v)))
+            .ToList();
+        pairs.Add(new KeyValuePair<string, string?>("PageSize", size.ToString()));
+        if (page > 1)
+            pairs.Add(new KeyValuePair<string, string?>("Page", page.ToString()));
+        return QueryHelpers.AddQueryString(Context.Request.Path.Value ?? "", pairs);
+    }
+
+    // Geçerli sayfanın ±2 komşusu, ilk ve son sayfa; aralarda "…"
+    var pages = new List<int>();
+    for (var p = 1; p <= Model.TotalPages; p++)
+    {
+        if (p == 1 || p == Model.TotalPages || Math.Abs(p - Model.Page) <= 2)
+            pages.Add(p);
+    }
+}
+
+@if (Model.TotalCount > 0)
+{
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
+        <div class="d-flex flex-wrap align-items-center gap-2 small text-muted">
+            <label for="pageSizeSelect" class="mb-0">Sayfa başına</label>
+            <select id="pageSizeSelect" class="form-select form-select-sm w-auto"
+                    onchange="location.href = this.value">
+                @foreach (var size in PagedFilter.PageSizes)
+                {
+                    <option value="@Link(1, size)" selected="@(size == Model.PageSize)">@size</option>
+                }
+            </select>
+            <span>@Model.From–@Model.To / @Model.TotalCount kayıt</span>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Sayfalama">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Link(Model.Page - 1, Model.PageSize)" aria-label="Önceki sayfa">‹</a>
+                    </li>
+                    @for (var i = 0; i < pages.Count; i++)
+                    {
+                        var p = pages[i];
+                        if (i > 0 && p - pages[i - 1] > 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        }
+                        <li class="page-item @(p == Model.Page ? "active" : "")">
+                            <a class="page-link" href="@Link(p, Model.PageSize)"
+                               aria-current="@(p == Model.Page ? "page" : null)">@p</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Link(Model.Page + 1, Model.PageSize)" aria-label="Sonraki sayfa">›</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+}

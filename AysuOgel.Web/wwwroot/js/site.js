@@ -46,3 +46,43 @@ document.addEventListener('click', (e) => {
   document.getElementById('lightboxCap').textContent = caption;
   bootstrap.Modal.getOrCreateInstance(document.getElementById('lightbox')).show();
 });
+
+// Kart kaydırıcı: oklar, uçlarda pasif, taşma yoksa oklar gizli
+(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.querySelectorAll('[data-card-slider]').forEach(slider => {
+        const track = slider.querySelector('.slider-track');
+        const prev = slider.querySelector('.slider-arrow.prev');
+        const next = slider.querySelector('.slider-arrow.next');
+        if (!track || !prev || !next) return;
+
+        let ticking = false;
+        const update = () => {
+            const max = track.scrollWidth - track.clientWidth;
+            slider.classList.toggle('no-scroll', max <= 2);
+            prev.disabled = track.scrollLeft <= 2;
+            next.disabled = track.scrollLeft >= max - 2;
+            ticking = false;
+        };
+        const queueUpdate = () => {
+            if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        };
+
+        const move = dir => {
+            const item = track.querySelector('.slider-item');
+            if (!item) return;
+            const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+            const itemWidth = item.getBoundingClientRect().width + gap;
+            const perView = Math.max(1, Math.round(track.clientWidth / itemWidth));
+            track.scrollBy({ left: dir * itemWidth * perView, behavior: reduce ? 'auto' : 'smooth' });
+        };
+
+        prev.addEventListener('click', () => move(-1));
+        next.addEventListener('click', () => move(1));
+        track.addEventListener('scroll', queueUpdate, { passive: true });
+        window.addEventListener('resize', queueUpdate);
+        window.addEventListener('load', update);
+        update();
+    });
+})();

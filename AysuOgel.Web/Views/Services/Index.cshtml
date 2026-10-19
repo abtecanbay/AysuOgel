@@ -16,22 +16,41 @@
 {
     <section class="post-block reveal" id="post-hizmetler">
         <h2 class="h3 section-title">Neler yapıyoruz?</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            @foreach (var s in Model.Services)
-            {
-                <div class="col">
-                    <div class="card h-100">
-                        @if (!string.IsNullOrEmpty(s.ImageUrl))
-                        {
-                            <img src="@Url.ImageUrl(s.ImageUrl)" class="card-img-top media-img" alt="@s.Name" loading="lazy" />
-                        }
-                        <div class="card-body">
-                            <h3 class="h5 card-title">@s.Name</h3>
-                            <p class="card-text text-muted">@s.ShortDescription</p>
-                        </div>
+
+        <div class="card-slider" data-card-slider role="region" aria-roledescription="carousel" aria-label="Hizmetler">
+            <button type="button" class="slider-arrow prev" aria-label="Önceki hizmetler">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6" />
+                </svg>
+            </button>
+
+            <div class="slider-track" tabindex="0">
+                @foreach (var s in Model.Services)
+                {
+                    <div class="slider-item">
+                        <a asp-controller="Services" asp-action="Details" asp-route-id="@s.Id"
+                           class="card service-card h-100 text-decoration-none">
+                            @if (!string.IsNullOrEmpty(s.ImageUrl))
+                            {
+                                <img src="@Url.ImageUrl(s.ImageUrl)" class="card-img-top media-img" alt="" loading="lazy" />
+                            }
+                            <div class="card-body d-flex flex-column">
+                                <h3 class="h5 card-title">@s.Name</h3>
+                                <p class="card-text text-muted">@s.ShortDescription</p>
+                                <span class="service-more mt-auto">Detayları gör <span aria-hidden="true">→</span></span>
+                            </div>
+                        </a>
                     </div>
-                </div>
-            }
+                }
+            </div>
+
+            <button type="button" class="slider-arrow next" aria-label="Sonraki hizmetler">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6" />
+                </svg>
+            </button>
         </div>
     </section>
 }

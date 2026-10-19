@@ -46,7 +46,7 @@ public class AppointmentService : IAppointmentService
         }
     }
 
-    public Task<List<Appointment>> GetAllAsync(AppointmentFilter filter)
+    public Task<PagedResult<Appointment>> GetAllAsync(AppointmentFilter filter)
     {
         var query = _db.Appointments.AsNoTracking().Include(a => a.ContactMessage).AsQueryable();
 
@@ -78,11 +78,7 @@ public class AppointmentService : IAppointmentService
         ? query.OrderByDescending(a => a.SlotStart).ThenByDescending(a => a.Id)
         : query.OrderBy(a => a.SlotStart).ThenBy(a => a.Id);
 
-        //query = filter.All
-        //    ? query.OrderByDescending(a => a.SlotStart)
-        //    : query.OrderBy(a => a.SlotStart);
-
-        return query.ToListAsync();
+        return query.ToPagedAsync(filter.Page, filter.PageSize);
     }
 
     public async Task<bool> SetStatusAsync(int id, AppointmentStatus status)
