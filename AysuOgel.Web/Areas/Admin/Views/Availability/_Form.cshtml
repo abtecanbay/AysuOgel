@@ -1,26 +1,33 @@
 ﻿@model AvailabilityFormViewModel
 
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
 <div class="row g-3 mb-3">
     <div class="col-md-6">
         <label asp-for="Date" class="form-label"></label>
-        <input asp-for="Date" class="form-control" />
+        <input asp-for="Date" type="date" class="form-control" required />
         <span asp-validation-for="Date" class="text-danger"></span>
     </div>
     <div class="col-md-6">
         <label asp-for="SlotMinutes" class="form-label"></label>
-        <input asp-for="SlotMinutes" class="form-control" />
+        <select asp-for="SlotMinutes" class="form-select">
+            <option value="15">15 dakika</option>
+            <option value="20">20 dakika</option>
+            <option value="30">30 dakika</option>
+            <option value="45">45 dakika</option>
+            <option value="60">60 dakika</option>
+        </select>
         <span asp-validation-for="SlotMinutes" class="text-danger"></span>
     </div>
     <div class="col-md-6">
         <label asp-for="StartTime" class="form-label"></label>
-        <input asp-for="StartTime" class="form-control" />
+        <input asp-for="StartTime" type="time" class="form-control" required />
         <span asp-validation-for="StartTime" class="text-danger"></span>
     </div>
     <div class="col-md-6">
         <label asp-for="EndTime" class="form-label"></label>
-        <input asp-for="EndTime" class="form-control" />
+        <input asp-for="EndTime" type="time" class="form-control" required />
         <span asp-validation-for="EndTime" class="text-danger"></span>
+        <div class="form-text">Son randevunun bittiği saat.</div>
     </div>
 </div>
