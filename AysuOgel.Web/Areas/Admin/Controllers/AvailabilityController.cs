@@ -1,4 +1,5 @@
 ﻿using AysuOgel.Business.Abstract;
+using AysuOgel.Business.Models;
 using AysuOgel.Entities.Entities;
 using AysuOgel.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -15,8 +16,41 @@ public class AvailabilityController : Controller
 
     public AvailabilityController(IAvailabilityService availability) => _availability = availability;
 
-    public async Task<IActionResult> Index() =>
-        View(await _availability.GetUpcomingAsync());
+    [HttpGet]
+    public async Task<IActionResult> Index(
+        DateOnly? startDate,
+        DateOnly? endDate,
+        int page = 1,
+        int pageSize = PagedFilter.DefaultPageSize)
+    {
+        var model = new AvailabilityListViewModel
+        {
+            StartDate = startDate,
+            EndDate = endDate,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var queryStartDate = startDate;
+        var queryEndDate = endDate;
+
+        if (startDate.HasValue && endDate.HasValue && startDate.Value > endDate.Value)
+        {
+            ModelState.AddModelError(string.Empty, "Başlangıç tarihi, bitiş tarihinden sonra olamaz.");
+            queryStartDate = null;
+            queryEndDate = null;
+        }
+
+        var result = await _availability.GetPagedAsync(
+            queryStartDate, queryEndDate, model.Page, model.PageSize);
+
+        model.Items = result.Items;
+        model.Page = result.Page;
+        model.PageSize = result.PageSize;
+        model.TotalCount = result.TotalCount;
+
+        return View(model);
+    }
 
     [HttpGet]
     public IActionResult Create()
