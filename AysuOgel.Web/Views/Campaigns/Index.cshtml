@@ -1,0 +1,62 @@
+﻿@model CampaignsPageViewModel
+@{
+    ViewData["Title"] = "Kampanyalarımız";
+}
+
+<section class="campaign-hero reveal @(string.IsNullOrWhiteSpace(Model.PageSettings.BannerImageUrl) ? "campaign-hero-no-image" : "")">
+    @if (!string.IsNullOrWhiteSpace(Model.PageSettings.BannerImageUrl))
+    {
+        <img class="campaign-hero-image" src="@Url.ImageUrl(Model.PageSettings.BannerImageUrl)" alt="" fetchpriority="high" />
+    }
+    <div class="campaign-hero-overlay"></div>
+    <div class="campaign-hero-content">
+        <p class="campaign-eyebrow">AYSU ÖĞEL · SAĞLIKLI YAŞAM</p>
+        <h1>@Model.PageSettings.IntroTitle</h1>
+        <p class="mb-0">@Model.PageSettings.IntroText</p>
+    </div>
+</section>
+
+<section class="post-block campaign-list-section">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-4">
+        <div>
+            <p class="campaign-section-eyebrow mb-1">GÜNCEL FIRSATLAR</p>
+            <h2 class="h3 section-title mb-0">Şu anki kampanyalar</h2>
+        </div>
+        <p class="text-muted mb-0">Tarihi geçerli kampanyalarımız</p>
+    </div>
+
+    @if (Model.Campaigns.Count == 0)
+    {
+        <div class="campaign-empty-state">
+            <span class="campaign-empty-icon" aria-hidden="true">✦</span>
+            <h3 class="h5">Şu anda yayında kampanya bulunmuyor</h3>
+            <p class="text-muted mb-0">Yeni fırsatlarımız için daha sonra tekrar ziyaret edebilirsiniz.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 campaign-grid">
+            @foreach (var campaign in Model.Campaigns)
+            {
+                <div class="col">
+                    <article class="campaign-card h-100">
+                        <div class="campaign-card-image-wrap">
+                            <img src="@Url.ImageUrl(campaign.ImageUrl)" class="campaign-card-image" alt="@campaign.Title" loading="lazy" />
+                            <span class="campaign-date-badge">
+                                @campaign.StartDate.ToString("dd.MM.yyyy") – @campaign.EndDate.ToString("dd.MM.yyyy")
+                            </span>
+                        </div>
+                        <div class="campaign-card-body">
+                            <h3 class="h4 campaign-card-title">@campaign.Title</h3>
+                            @if (!string.IsNullOrWhiteSpace(campaign.ShortDescription))
+                            {
+                                <p class="campaign-card-lead">@campaign.ShortDescription</p>
+                            }
+                            <p class="campaign-card-description mb-0">@campaign.Description</p>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+</section>
