@@ -1,6 +1,7 @@
 using AysuOgel.Business.Abstract;
 using AysuOgel.Entities.Entities;
 using AysuOgel.Web.Helpers;
+using AysuOgel.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,8 +20,16 @@ public class CampaignsController : Controller
         _environment = environment;
     }
 
-    public async Task<IActionResult> Index() =>
-        View(await _campaigns.GetAllAsync());
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var model = new CampaignsDashboardViewModel
+        {
+            Campaigns = await _campaigns.GetAllAsync(),
+            PageSettings = await _campaigns.GetPageSettingsAsync()
+        };
+        return View(model);
+    }
 
     public IActionResult Create() => View(new Campaign
     {
@@ -47,7 +56,7 @@ public class CampaignsController : Controller
 
         await _campaigns.CreateAsync(model);
         TempData["CampaignSuccess"] = "Kampanya oluşturuldu.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { section = "campaigns" });
     }
 
     public async Task<IActionResult> Edit(int id)
@@ -68,7 +77,7 @@ public class CampaignsController : Controller
         {
             var path = await ImageUploadHelper.SaveImageAsync(imageFile, _environment.WebRootPath);
             if (path is null)
-                ModelState.AddModelError("ImageFile", "Yalnızca geçerli JPG, PNG veya WEBP görselleri yükleyebilirsiniz. En fazla 5 MB.");
+                ModelState.AddModelError("ImageFile", "Yalnızca geçerli JPG, PNG veya WEBP görsellerini yükleyebilirsiniz. En fazla 5 MB.");
             else
                 model.ImageUrl = path;
         }
@@ -77,7 +86,7 @@ public class CampaignsController : Controller
 
         await _campaigns.UpdateAsync(model);
         TempData["CampaignSuccess"] = "Kampanya güncellendi.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { section = "campaigns" });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -85,12 +94,13 @@ public class CampaignsController : Controller
     {
         await _campaigns.DeleteAsync(id);
         TempData["CampaignSuccess"] = "Kampanya silindi.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { section = "campaigns" });
     }
 
+    // Eski bağlantılar bozulmasın; banner ayarları birleşik sayfaya yönlendirilsin.
     [HttpGet]
-    public async Task<IActionResult> PageSettings() =>
-        View(await _campaigns.GetPageSettingsAsync());
+    public IActionResult PageSettings() =>
+        RedirectToAction(nameof(Index), new { section = "banner" });
 
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(ImageUploadHelper.MaxImageBytes + 256 * 1024)]
     public async Task<IActionResult> PageSettings(
@@ -103,15 +113,23 @@ public class CampaignsController : Controller
         {
             var path = await ImageUploadHelper.SaveImageAsync(bannerFile, _environment.WebRootPath);
             if (path is null)
-                ModelState.AddModelError("BannerFile", "Yalnızca geçerli JPG, PNG veya WEBP görselleri yükleyebilirsiniz. En fazla 5 MB.");
+                ModelState.AddModelError("BannerFile", "Yalnızca geçerli JPG, PNG veya WEBP görsellerini yükleyebilirsiniz. En fazla 5 MB.");
             else
                 model.BannerImageUrl = path;
         }
 
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid)
+        {
+            var dashboard = new CampaignsDashboardViewModel
+            {
+                Campaigns = await _campaigns.GetAllAsync(),
+                PageSettings = model
+            };
+            return View("Index", dashboard);
+        }
 
         await _campaigns.UpdatePageSettingsAsync(model);
         TempData["CampaignSettingsSuccess"] = "Kampanya sayfası başlığı güncellendi.";
-        return RedirectToAction(nameof(PageSettings));
+        return RedirectToAction(nameof(Index), new { section = "banner" });
     }
 }
