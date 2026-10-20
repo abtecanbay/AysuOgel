@@ -22,6 +22,163 @@ namespace AysuOgel.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AboutBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Layout")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Text")
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive", "DisplayOrder");
+
+                    b.ToTable("AboutBlocks", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2026, 10, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 1,
+                            IsActive = true,
+                            Layout = 1,
+                            Slug = "mekanimiz",
+                            Text = "Bu alan örnek metindir.\nMekanın genel tanıtımı, yaklaşımınız ve hizmet anlayışınız buraya yazılabilir.",
+                            Title = "Mekanımız"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2026, 10, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 2,
+                            IsActive = true,
+                            Layout = 2,
+                            Slug = "vaccu-active",
+                            Text = "Bu alan örnek metindir.\nUygulamanın ne olduğu, nasıl yapıldığı ve seans bilgileri buraya yazılabilir.",
+                            Title = "Vaccu Active"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2026, 10, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 3,
+                            IsActive = true,
+                            Layout = 1,
+                            Slug = "roll-shape",
+                            Text = "Bu alan örnek metindir.\nUygulamanın tanıtımı ve seans bilgileri buraya yazılabilir.",
+                            Title = "Roll Shape"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(2026, 10, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayOrder = 4,
+                            IsActive = true,
+                            Layout = 2,
+                            Slug = "cilt-bakimi",
+                            Text = "Bu alan örnek metindir.\nCilt bakımı hizmetleri ve kullanılan ürünler buraya yazılabilir.",
+                            Title = "Profesyonel Cilt Bakımı"
+                        });
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AboutBlockImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AboutBlockId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Alt")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Caption")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AboutBlockId", "DisplayOrder");
+
+                    b.ToTable("AboutBlockImages", (string)null);
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AboutPageSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Intro")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AboutPageSettings", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Intro = "Çankaya, Ankara'da 6 yıldır hizmet veriyoruz. Bu alan örnek metindir; işletmenin kısa tanıtımı buraya gelecek.",
+                            Title = "Hakkımızda"
+                        });
+                });
+
             modelBuilder.Entity("AysuOgel.Entities.Entities.Appointment", b =>
                 {
                     b.Property<int>("Id")
@@ -357,6 +514,17 @@ namespace AysuOgel.DataAccess.Migrations
                     b.ToTable("SuccessStories", (string)null);
                 });
 
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AboutBlockImage", b =>
+                {
+                    b.HasOne("AysuOgel.Entities.Entities.AboutBlock", "AboutBlock")
+                        .WithMany("Images")
+                        .HasForeignKey("AboutBlockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AboutBlock");
+                });
+
             modelBuilder.Entity("AysuOgel.Entities.Entities.Appointment", b =>
                 {
                     b.HasOne("AysuOgel.Entities.Entities.ContactMessage", "ContactMessage")
@@ -377,6 +545,11 @@ namespace AysuOgel.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("ContactMessage");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AboutBlock", b =>
+                {
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

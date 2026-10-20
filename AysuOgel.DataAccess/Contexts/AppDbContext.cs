@@ -18,6 +18,9 @@ public class AppDbContext : DbContext
     public DbSet<Campaign> Campaigns => Set<Campaign>();
     public DbSet<CampaignPageSettings> CampaignPageSettings => Set<CampaignPageSettings>();
     public DbSet<SuccessStory> SuccessStories => Set<SuccessStory>();
+    public DbSet<AboutPageSettings> AboutPageSettings => Set<AboutPageSettings>();
+    public DbSet<AboutBlock> AboutBlocks => Set<AboutBlock>();
+    public DbSet<AboutBlockImage> AboutBlockImages => Set<AboutBlockImage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -144,6 +147,80 @@ public class AppDbContext : DbContext
             entity.Property(x => x.Description).HasMaxLength(600).IsRequired();
 
             entity.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+        });
+
+        modelBuilder.Entity<AboutPageSettings>(entity =>
+        {
+            entity.ToTable("AboutPageSettings");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
+            entity.Property(x => x.Title).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Intro).HasMaxLength(1000);
+
+            entity.HasData(new AboutPageSettings
+            {
+                Id = 1,
+                Title = "Hakkımızda",
+                Intro = "Çankaya, Ankara'da 6 yıldır hizmet veriyoruz. Bu alan örnek metindir; işletmenin kısa tanıtımı buraya gelecek."
+            });
+        });
+
+        modelBuilder.Entity<AboutBlock>(entity =>
+        {
+            entity.ToTable("AboutBlocks");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Slug).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Text).HasMaxLength(3000);
+
+            entity.HasIndex(x => x.Slug).IsUnique();   // sayfa içi bağlantılar (#post-{Slug}) çakışmasın
+            entity.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+
+            // Mevcut statik içerik, migration sonrası sayfa boş kalmasın diye taşınır.
+            var seededAt = new DateTime(2026, 10, 20, 0, 0, 0, DateTimeKind.Utc);
+            entity.HasData(
+                new AboutBlock
+                {
+                    Id = 1, Slug = "mekanimiz", Title = "Mekanımız", DisplayOrder = 1, IsActive = true, CreatedAt = seededAt,
+                    Text = "Bu alan örnek metindir.\nMekanın genel tanıtımı, yaklaşımınız ve hizmet anlayışınız buraya yazılabilir.",
+                    Layout = AboutBlockLayout.ImageLeft
+                },
+                new AboutBlock
+                {
+                    Id = 2, Slug = "vaccu-active", Title = "Vaccu Active", DisplayOrder = 2, IsActive = true, CreatedAt = seededAt,
+                    Text = "Bu alan örnek metindir.\nUygulamanın ne olduğu, nasıl yapıldığı ve seans bilgileri buraya yazılabilir.",
+                    Layout = AboutBlockLayout.ImageRight
+                },
+                new AboutBlock
+                {
+                    Id = 3, Slug = "roll-shape", Title = "Roll Shape", DisplayOrder = 3, IsActive = true, CreatedAt = seededAt,
+                    Text = "Bu alan örnek metindir.\nUygulamanın tanıtımı ve seans bilgileri buraya yazılabilir.",
+                    Layout = AboutBlockLayout.ImageLeft
+                },
+                new AboutBlock
+                {
+                    Id = 4, Slug = "cilt-bakimi", Title = "Profesyonel Cilt Bakımı", DisplayOrder = 4, IsActive = true, CreatedAt = seededAt,
+                    Text = "Bu alan örnek metindir.\nCilt bakımı hizmetleri ve kullanılan ürünler buraya yazılabilir.",
+                    Layout = AboutBlockLayout.ImageRight
+                });
+        });
+
+        modelBuilder.Entity<AboutBlockImage>(entity =>
+        {
+            entity.ToTable("AboutBlockImages");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Url).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.Alt).HasMaxLength(200);
+            entity.Property(x => x.Caption).HasMaxLength(300);
+
+            entity.HasOne(x => x.AboutBlock)
+                .WithMany(x => x.Images)
+                .HasForeignKey(x => x.AboutBlockId)
+                .OnDelete(DeleteBehavior.Cascade);   // blok silinirse görsel kayıtları da silinir
+
+            entity.HasIndex(x => new { x.AboutBlockId, x.DisplayOrder });
         });
     }
 }

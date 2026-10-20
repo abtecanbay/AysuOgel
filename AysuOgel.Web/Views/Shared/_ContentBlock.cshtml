@@ -5,10 +5,44 @@
     {
         case BlockLayout.ImageLeft:
         case BlockLayout.ImageRight:
-            var first = Model.Images.FirstOrDefault(i => !string.IsNullOrWhiteSpace(i.Url));
+            var images = Model.Images.Where(i => !string.IsNullOrWhiteSpace(i.Url)).ToList();
+            var first = images.FirstOrDefault();
             <div class="row align-items-center g-4">
                 <div class="col-md-6 @(Model.Layout == BlockLayout.ImageRight ? "order-md-2" : "")">
-                    @if (first != null)
+                    @if (images.Count > 1)
+                    {
+                        // Birden fazla görsel varsa 5 sn aralıkla kendiliğinden kayar.
+                        var sliderId = "block-slider-" + (string.IsNullOrEmpty(Model.Slug) ? Guid.NewGuid().ToString("N") : Model.Slug);
+                        <div id="@sliderId" class="carousel slide block-slider shadow-sm" data-bs-ride="carousel" data-bs-interval="5000"
+                             aria-roledescription="carousel" aria-label="@Model.Title görselleri">
+                            <div class="carousel-indicators">
+                                @for (var i = 0; i < images.Count; i++)
+                                {
+                                    <button type="button" data-bs-target="#@sliderId" data-bs-slide-to="@i"
+                                            class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : null)"
+                                            aria-label="@(i + 1). görsel"></button>
+                                }
+                            </div>
+                            <div class="carousel-inner">
+                                @for (var i = 0; i < images.Count; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@Url.ImageUrl(images[i].Url)" alt="@images[i].Alt" class="media-img d-block"
+                                             loading="@(i == 0 ? "eager" : "lazy")" />
+                                    </div>
+                                }
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#@sliderId" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Önceki</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#@sliderId" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Sonraki</span>
+                            </button>
+                        </div>
+                    }
+                    else if (first != null)
                     {
                         <img src="@Url.ImageUrl(first.Url)" alt="@first.Alt" class="media-img shadow-sm" loading="lazy" />
                     }

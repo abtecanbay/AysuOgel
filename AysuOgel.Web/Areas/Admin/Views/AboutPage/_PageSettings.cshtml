@@ -1,0 +1,21 @@
+@model AboutPageSettings
+<div class="card admin-form-card"><div class="card-body p-4">
+    <form asp-action="Settings" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" maxlength="150" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Intro" class="form-label"></label>
+            <textarea asp-for="Intro" class="form-control" rows="3" maxlength="1000"></textarea>
+            <span asp-validation-for="Intro" class="text-danger"></span>
+            <div class="form-text">Başlığın altında gösterilen kısa tanıtım. Boş bırakılabilir.</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-primary px-4">Kaydet</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">İptal</a>
+        </div>
+    </form>
+</div></div>

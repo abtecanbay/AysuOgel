@@ -1,0 +1,64 @@
+@model List<AboutBlock>
+<div class="card admin-table-card">
+    <div class="card-header bg-white border-0 px-4 pt-4">
+        <h2 class="h5 mb-1">Blok listesi</h2>
+        <p class="text-muted small mb-0">@Model.Count kayıt · pasif bloklar sitede gösterilmez</p>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5 px-3">
+            <h3 class="h5">Henüz blok eklenmemiş</h3>
+            <p class="text-muted">İlk içerik bloğunu ekleyerek başlayabilirsiniz.</p>
+            <a asp-action="Create" class="btn btn-primary">Blok ekle</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive px-3 pb-3">
+            <table class="table align-middle">
+                <thead><tr><th>Sıra</th><th>Görsel</th><th>Blok</th><th>Yerleşim</th><th>Durum</th><th class="text-end">İşlemler</th></tr></thead>
+                <tbody>
+                @foreach (var block in Model)
+                {
+                    var cover = block.Images.OrderBy(i => i.DisplayOrder).ThenBy(i => i.Id).FirstOrDefault();
+                    <tr>
+                        <td><span class="admin-order-chip">@block.DisplayOrder</span></td>
+                        <td>
+                            @if (cover is not null)
+                            {
+                                <img src="@Url.ImageUrl(cover.Url)" class="admin-table-thumb campaign-admin-thumb" alt="" loading="lazy" />
+                            }
+                            else
+                            {
+                                <span class="admin-table-thumb admin-table-thumb-empty" aria-hidden="true">▢</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@block.Title</div>
+                            <div class="small text-muted">#post-@block.Slug · @block.Images.Count görsel</div>
+                        </td>
+                        <td class="text-muted">@block.Layout.DisplayName()</td>
+                        <td>
+                            @if (block.IsActive)
+                            {
+                                <span class="badge rounded-pill text-bg-success">Yayında</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill text-bg-secondary">Pasif</span>
+                            }
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Edit" asp-route-id="@block.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                            <form asp-action="Delete" asp-route-id="@block.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bu blok ve görselleri silinsin mi?');">
+                                <button class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

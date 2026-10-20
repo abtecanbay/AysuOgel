@@ -1,0 +1,66 @@
+@model AboutPageDashboardViewModel
+@{
+    ViewData["Title"] = "Hakkımızda";
+    var activeSection = Context.Request.Query["section"].ToString();
+    var settingsExpanded = activeSection == "settings" || !ViewData.ModelState.IsValid;
+    var blocksExpanded = !settingsExpanded;
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">İÇERİK YÖNETİMİ</p>
+        <h1 class="h3 mb-1">Hakkımızda</h1>
+        <p class="text-muted mb-0">Hakkımızda sayfasının başlığını ve içerik bloklarını (metin + görseller) yönetin.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/hakkimizda" target="_blank" rel="noopener" class="btn btn-outline-secondary">Sayfayı Gör ↗</a>
+        <a asp-action="Create" class="btn btn-primary">+ Yeni Blok</a>
+    </div>
+</div>
+
+@if (TempData["AboutSuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+
+<div class="accordion admin-campaigns-accordion" id="aboutAdminAccordion">
+    <div class="accordion-item admin-table-card mb-3">
+        <h2 class="accordion-header" id="aboutSettingsHeading">
+            <button class="accordion-button @(settingsExpanded ? "" : "collapsed")" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#aboutSettingsPanel" aria-expanded="@(settingsExpanded ? "true" : "false")" aria-controls="aboutSettingsPanel">
+                <span>
+                    <span class="d-block fw-semibold">1. Sayfa Başlığı</span>
+                    <span class="d-block small text-muted fw-normal">Sayfanın üstündeki başlık ve giriş metni</span>
+                </span>
+            </button>
+        </h2>
+        <div id="aboutSettingsPanel" class="accordion-collapse collapse @(settingsExpanded ? "show" : "")"
+             aria-labelledby="aboutSettingsHeading" data-bs-parent="#aboutAdminAccordion">
+            <div class="accordion-body">
+                <partial name="_PageSettings" model="Model.Settings" />
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item admin-table-card">
+        <h2 class="accordion-header" id="aboutBlocksHeading">
+            <button class="accordion-button @(blocksExpanded ? "" : "collapsed")" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#aboutBlocksPanel" aria-expanded="@(blocksExpanded ? "true" : "false")" aria-controls="aboutBlocksPanel">
+                <span>
+                    <span class="d-block fw-semibold">2. İçerik Blokları</span>
+                    <span class="d-block small text-muted fw-normal">@Model.Blocks.Count blok · sayfada sıra numarasına göre gösterilir</span>
+                </span>
+            </button>
+        </h2>
+        <div id="aboutBlocksPanel" class="accordion-collapse collapse @(blocksExpanded ? "show" : "")"
+             aria-labelledby="aboutBlocksHeading" data-bs-parent="#aboutAdminAccordion">
+            <div class="accordion-body">
+                <partial name="_BlockList" model="Model.Blocks" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

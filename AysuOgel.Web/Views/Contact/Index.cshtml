@@ -5,6 +5,9 @@
 
 @{
     ViewData["Title"] = "İletişim";
+    const string MapPlace = "Arma Kule";
+    const string MapAddress = "Kızılırmak, 2121. Sk. No:5, 06510 Çankaya/Ankara";
+    var mapQuery = Uri.EscapeDataString($"{MapPlace}, {MapAddress}");
 }
 
 <section class="page-head reveal">
@@ -18,17 +21,27 @@
             <div class="card-body">
                 <h2 class="h5 mb-3">Bize ulaşın</h2>
                 <ul class="contact-info list-unstyled mb-4">
-                    <li><span class="compare-label">Adres</span>Çankaya, Ankara (detaylı adres yakında eklenecek)</li>
+                    <li>
+                        <span class="compare-label">Adres</span>
+                        <address class="mb-0">
+                            <strong>@MapPlace</strong><br />
+                            @MapAddress
+                        </address>
+                    </li>
                     <li><span class="compare-label">Telefon</span>Bu alan örnek metindir.</li>
                     <li><span class="compare-label">Çalışma saatleri</span>Bu alan örnek metindir.</li>
                 </ul>
-                <div class="media-placeholder" role="img" aria-label="Harita için ayrılmış alan">
-                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    <span>Harita eklenecek</span>
+                <div class="contact-map shadow-sm">
+                    <iframe src="https://maps.google.com/maps?q=@mapQuery&z=17&hl=tr&output=embed"
+                            title="@MapPlace konumu - Google Haritalar" loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    @* Başlangıç noktası verilmez; Google Haritalar ziyaretçinin konumundan (ya da yazdığı yerden) Arma Kule'ye yol tarifi açar. *@
+                    <a class="btn btn-banner" href="https://www.google.com/maps/dir/?api=1&destination=@mapQuery"
+                       target="_blank" rel="noopener">Yol tarifi al</a>
+                    <a class="btn btn-outline-secondary" href="https://www.google.com/maps/search/?api=1&query=@mapQuery"
+                       target="_blank" rel="noopener">Google Haritalar'da aç</a>
                 </div>
             </div>
         </div>

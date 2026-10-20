@@ -16,7 +16,7 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<IServicesPageService, StaticServicesPageService>();
 builder.Services.AddScoped<IHomePageService, StaticHomePageService>();
-builder.Services.AddScoped<IAboutPageService, StaticAboutPageService>();
+builder.Services.AddScoped<IAboutPageService, AboutPageService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IAppointmentSlotService, DbAppointmentSlotService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
