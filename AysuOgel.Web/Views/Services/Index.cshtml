@@ -108,35 +108,27 @@
     </div>
 </section>
 
-@if (c.Transformations.Any())
+@if (Model.Successes.Any())
 {
     <section class="post-block reveal" id="post-degisim">
         <h2 class="h3 section-title">@c.TransformationsTitle</h2>
         <div class="row row-cols-1 row-cols-md-2 g-4">
-            @foreach (var t in c.Transformations)
+            @foreach (var story in Model.Successes)
             {
                 <div class="col">
                     <div class="card h-100">
                         <div class="card-body">
-                            <div class="ba-meta">
-                                @if (!string.IsNullOrEmpty(t.Program)) { <span class="chip">@t.Program</span> }
-                                @if (!string.IsNullOrEmpty(t.Duration)) { <span class="chip">@t.Duration</span> }
-                            </div>
                             <div class="row row-cols-2 g-2">
                                 <div class="col">
                                     <partial name="_BeforeAfterFrame"
-                                             model="@(new BeforeAfterFrame(t.BeforeImageUrl, "Öncesi", t.Name + " öncesi", false))" />
+                                             model="@(new BeforeAfterFrame(story.BeforeImageUrl, "Öncesi", "Üyemizin değişimi, öncesi", false))" />
                                 </div>
                                 <div class="col">
                                     <partial name="_BeforeAfterFrame"
-                                             model="@(new BeforeAfterFrame(t.AfterImageUrl, "Sonrası", t.Name + " sonrası", true))" />
+                                             model="@(new BeforeAfterFrame(story.AfterImageUrl, "Sonrası", "Üyemizin değişimi, sonrası", true))" />
                                 </div>
                             </div>
-                            <p class="fw-bold mt-3 mb-1">@t.Name</p>
-                            @if (!string.IsNullOrEmpty(t.Note))
-                            {
-                                <p class="small text-muted mb-0">@t.Note</p>
-                            }
+                            <p class="post-text mt-3 mb-0">@story.Description</p>
                         </div>
                     </div>
                 </div>
@@ -147,10 +139,10 @@
             <p class="small text-muted mt-3 mb-0">@c.TransformationsNote</p>
         }
     </section>
-
-    <section class="cta-band reveal mt-2">
-        <h2 class="h4 mb-2">Size özel programı birlikte planlayalım</h2>
-        <p class="mb-3">Formu doldurun, size dönüş yapalım.</p>
-        <a class="btn btn-banner btn-lg" href="/iletisim?subject=RandevuTalebi">Randevu talep et</a>
-    </section>
 }
+
+<section class="cta-band reveal mt-2">
+    <h2 class="h4 mb-2">Size özel programı birlikte planlayalım</h2>
+    <p class="mb-3">Formu doldurun, size dönüş yapalım.</p>
+    <a class="btn btn-banner btn-lg" href="/iletisim?subject=RandevuTalebi">Randevu talep et</a>
+</section>

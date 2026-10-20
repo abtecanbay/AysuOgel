@@ -1,0 +1,79 @@
+﻿@model List<SuccessStory>
+@{
+    ViewData["Title"] = "Başarılarımız";
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">İÇERİK YÖNETİMİ</p>
+        <h1 class="h3 mb-1">Başarılarımız</h1>
+        <p class="text-muted mb-0">Hizmetler sayfasındaki "Üyelerimizin değişimi" alanında gösterilen öncesi / sonrası kayıtlarını yönetin.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary px-3">+ Yeni Başarı</a>
+</div>
+
+@if (TempData["StorySuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+
+<div class="card admin-table-card">
+    <div class="card-header bg-white border-0 px-4 pt-4">
+        <h2 class="h5 mb-1">Başarı listesi</h2>
+        <p class="text-muted small mb-0">@Model.Count kayıt</p>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5 px-3">
+            <h3 class="h5">Henüz başarı kaydı eklenmemiş</h3>
+            <p class="text-muted">İlk öncesi / sonrası kaydını ekleyerek başlayabilirsiniz.</p>
+            <a asp-action="Create" class="btn btn-primary">Yeni başarı ekle</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive px-3 pb-3">
+            <table class="table align-middle">
+                <thead><tr><th>Sıra</th><th>Öncesi / Sonrası</th><th>Açıklama</th><th>Durum</th><th class="text-end">İşlemler</th></tr></thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><span class="admin-order-chip">@s.DisplayOrder</span></td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    @if (!string.IsNullOrWhiteSpace(s.BeforeImageUrl))
+                                    {
+                                        <img src="@Url.ImageUrl(s.BeforeImageUrl)" class="admin-table-thumb campaign-admin-thumb" alt="Öncesi" loading="lazy" />
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(s.AfterImageUrl))
+                                    {
+                                        <img src="@Url.ImageUrl(s.AfterImageUrl)" class="admin-table-thumb campaign-admin-thumb" alt="Sonrası" loading="lazy" />
+                                    }
+                                </div>
+                            </td>
+                            <td class="text-muted">@(s.Description.Length > 110 ? s.Description[..110] + "…" : s.Description)</td>
+                            <td>
+                                @if (s.IsActive)
+                                {
+                                    <span class="badge rounded-pill text-bg-success">Yayında</span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill text-bg-secondary">Pasif</span>
+                                }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                                <form asp-action="Delete" asp-route-id="@s.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bu başarı kaydı silinsin mi?');">
+                                    <button class="btn btn-sm btn-outline-danger">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

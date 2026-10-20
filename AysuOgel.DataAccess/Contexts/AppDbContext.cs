@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<MessageReply> MessageReplies => Set<MessageReply>();
     public DbSet<Campaign> Campaigns => Set<Campaign>();
     public DbSet<CampaignPageSettings> CampaignPageSettings => Set<CampaignPageSettings>();
+    public DbSet<SuccessStory> SuccessStories => Set<SuccessStory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -131,6 +132,18 @@ public class AppDbContext : DbContext
                 .HasFilter($"[Status] <> {(int)AppointmentStatus.IptalEdildi}");
 
             entity.HasIndex(x => new { x.Status, x.SlotStart });
+        });
+
+        modelBuilder.Entity<SuccessStory>(entity =>
+        {
+            entity.ToTable("SuccessStories");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.BeforeImageUrl).HasMaxLength(1000);
+            entity.Property(x => x.AfterImageUrl).HasMaxLength(1000);
+            entity.Property(x => x.Description).HasMaxLength(600).IsRequired();
+
+            entity.HasIndex(x => new { x.IsActive, x.DisplayOrder });
         });
     }
 }

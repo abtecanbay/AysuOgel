@@ -1,0 +1,68 @@
+﻿@model SuccessStory
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="alert alert-light border small">
+    Fotoğrafları yayınlamadan önce üyeden <strong>yazılı izin</strong> alındığından emin olun (KVKK).
+    Dikey (4:5) fotoğraflar önerilir; sitede bu oranda kırpılarak gösterilir.
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="admin-image-upload-panel h-100">
+            <label class="form-label fw-semibold" for="beforeFile">Öncesi fotoğrafı</label>
+            <input id="beforeFile" name="beforeFile" type="file" class="form-control"
+                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+            <div class="form-text">JPG, PNG veya WEBP · en fazla 5 MB.</div>
+            @Html.ValidationMessage("BeforeFile", null, new { @class = "text-danger small d-block mt-2" })
+            <input type="hidden" asp-for="BeforeImageUrl" />
+            @if (!string.IsNullOrWhiteSpace(Model.BeforeImageUrl))
+            {
+                <div class="mt-3">
+                    <p class="small text-muted mb-2">Mevcut fotoğraf</p>
+                    <img src="@Url.ImageUrl(Model.BeforeImageUrl)" class="admin-image-preview campaign-form-preview" alt="Mevcut öncesi fotoğrafı" />
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="admin-image-upload-panel h-100">
+            <label class="form-label fw-semibold" for="afterFile">Sonrası fotoğrafı</label>
+            <input id="afterFile" name="afterFile" type="file" class="form-control"
+                   accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+            <div class="form-text">JPG, PNG veya WEBP · en fazla 5 MB.</div>
+            @Html.ValidationMessage("AfterFile", null, new { @class = "text-danger small d-block mt-2" })
+            <input type="hidden" asp-for="AfterImageUrl" />
+            @if (!string.IsNullOrWhiteSpace(Model.AfterImageUrl))
+            {
+                <div class="mt-3">
+                    <p class="small text-muted mb-2">Mevcut fotoğraf</p>
+                    <img src="@Url.ImageUrl(Model.AfterImageUrl)" class="admin-image-preview campaign-form-preview" alt="Mevcut sonrası fotoğrafı" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <label asp-for="Description" class="form-label"></label>
+    <textarea asp-for="Description" class="form-control" rows="4" maxlength="600"
+              placeholder="Süreci kısaca anlatın: hangi program, ne kadar süre, nasıl bir takip yapıldı?"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+    <div class="form-text">En fazla 600 karakter. Kesin sonuç vaadinden kaçının.</div>
+</div>
+
+<div class="row g-3 mt-1 align-items-end">
+    <div class="col-md-3">
+        <label asp-for="DisplayOrder" class="form-label"></label>
+        <input asp-for="DisplayOrder" class="form-control" type="number" />
+        <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check mb-2">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label"></label>
+        </div>
+    </div>
+</div>

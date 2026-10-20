@@ -23,6 +23,7 @@ builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IEmailSender, NotConfiguredEmailSender>();
 builder.Services.AddScoped<IMessageReplyService, MessageReplyService>();
+builder.Services.AddScoped<ISuccessStoryService, SuccessStoryService>();
 
 builder.Services.AddRateLimiter(o =>
 {

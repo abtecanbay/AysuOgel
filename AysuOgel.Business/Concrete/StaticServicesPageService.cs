@@ -51,11 +51,6 @@ public class StaticServicesPageService : IServicesPageService
 
             TransformationsTitle = "Üyelerimizin değişimi",
             TransformationsNote = "Sonuçlar kişiden kişiye farklılık gösterebilir. Görseller üyelerimizin izniyle paylaşılmaktadır.",
-            Transformations =
-            {
-                new TransformationCard { Name = "Üyemiz A.K.", Program = "Vaccu Active", Duration = "Örnek süre", Note = "Bu alan örnek metindir." },
-                new TransformationCard { Name = "Üyemiz B.Y.", Program = "Roll Shape", Duration = "Örnek süre", Note = "Bu alan örnek metindir." }
-            }
         };
 
         return Task.FromResult(content);
