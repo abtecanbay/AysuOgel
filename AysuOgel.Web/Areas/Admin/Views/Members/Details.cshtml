@@ -1,0 +1,219 @@
+@model MemberDetailsViewModel
+@using AysuOgel.Web.Helpers
+@{
+    var m = Model.Member;
+    ViewData["Title"] = $"{m.FirstName} {m.LastName}";
+    var phoneDigits = new string(m.Phone.Where(ch => char.IsDigit(ch) || ch == '+').ToArray());
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">ÜYE DETAYI</p>
+        <h1 class="h3 mb-0">@m.FirstName @m.LastName</h1>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Index" class="btn btn-outline-secondary">← Üyeler</a>
+        <a asp-action="Edit" asp-route-id="@m.Id" class="btn btn-outline-primary">Bilgileri düzenle</a>
+        <form asp-action="Delete" asp-route-id="@m.Id" method="post" class="d-inline"
+              onsubmit="return confirm('Üye ve tüm paket / seans kayıtları silinsin mi? Bu işlem geri alınamaz.');">
+            <button class="btn btn-outline-danger">Üyeyi sil</button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["MemberSuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["MemberError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+<div class="card admin-form-card mb-4"><div class="card-body p-4">
+    <dl class="row mb-0">
+        <dt class="col-sm-3">E-posta</dt>
+        <dd class="col-sm-9"><a href="mailto:@m.Email">@m.Email</a></dd>
+
+        <dt class="col-sm-3">Telefon</dt>
+        <dd class="col-sm-9"><a href="tel:@phoneDigits">@m.Phone</a></dd>
+
+        <dt class="col-sm-3">Kayıt tarihi</dt>
+        <dd class="col-sm-9 mb-0">@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</dd>
+    </dl>
+</div></div>
+
+<h2 class="h5 mb-3">Satın aldığı paketler</h2>
+
+@if (m.Packages.Count == 0)
+{
+    <p class="text-muted">Bu üyeye ait paket kaydı yok.</p>
+}
+
+@foreach (var mp in m.Packages)
+{
+    // Tarih sırası; seans numaraları da bu sıradan hesaplanır.
+    var sessions = mp.Sessions.OrderBy(s => s.ScheduledAt).ThenBy(s => s.CreatedAt).ToList();
+    var done = sessions.Count(s => s.Status == SessionStatus.Yapildi);
+    var planned = sessions.Count(s => s.Status == SessionStatus.Planlandi);
+    var canAdd = done + planned < mp.SessionCount;
+    var percent = mp.SessionCount == 0 ? 0 : done * 100 / mp.SessionCount;
+
+    <div class="card admin-table-card mb-4" id="package-@mp.Id">
+        <div class="card-header bg-white border-0 px-4 pt-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <h3 class="h5 mb-1">
+                        @mp.Package.Name
+                        <partial name="_MemberPackageStatusBadge" model="mp.Status" />
+                    </h3>
+                    <p class="small text-muted mb-0">
+                        Başlama: <strong>@mp.StartDate.ToString("dd.MM.yyyy")</strong>
+                        &middot; Bitiş: <strong>@(mp.EndDate?.ToString("dd.MM.yyyy") ?? "-")</strong>
+                        &middot; @done / @mp.SessionCount seans yapıldı
+                        @if (planned > 0)
+                        {
+                            <text>&middot; @planned planlı</text>
+                        }
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-action="EditPackage" asp-route-id="@mp.Id" class="btn btn-sm btn-outline-secondary">Tarihleri düzenle</a>
+                    <form asp-action="DeletePackage" asp-route-id="@mp.Id" method="post" class="d-inline"
+                          onsubmit="return confirm('Bu paket kaydı ve tüm seansları silinsin mi?');">
+                        <button class="btn btn-sm btn-outline-danger">Paketi sil</button>
+                    </form>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 6px" role="progressbar" aria-label="Tamamlanan seanslar"
+                 aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-success" style="width: @percent%"></div>
+            </div>
+        </div>
+
+        <div class="table-responsive px-3">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Seans</th><th>Tarih / saat</th><th>Durum</th><th>Not</th><th class="text-end">İşlemler</th></tr></thead>
+                <tbody>
+                @if (sessions.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-muted small">Henüz seans kaydı yok.</td></tr>
+                }
+                @foreach (var s in sessions)
+                {
+                    <tr class="@(s.Status == SessionStatus.IptalEdildi ? "text-muted" : "")">
+                        <td class="text-nowrap fw-semibold">@(s.Status == SessionStatus.IptalEdildi ? "—" : $"{s.SessionNumber}. seans")</td>
+                        <td class="text-nowrap">@s.ScheduledAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td><partial name="_SessionStatusBadge" model="s.Status" /></td>
+                        <td class="small" style="white-space: pre-line">@s.Note</td>
+                        <td class="text-end text-nowrap">
+                            @if (s.Status == SessionStatus.Planlandi)
+                            {
+                                <form asp-action="SetSessionStatus" asp-route-id="@s.Id" method="post" class="d-inline">
+                                    <input type="hidden" name="status" value="@((int)SessionStatus.Yapildi)" />
+                                    <button class="btn btn-sm btn-success">Yapıldı</button>
+                                </form>
+                                <form asp-action="SetSessionStatus" asp-route-id="@s.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bu seans iptal edilsin mi?');">
+                                    <input type="hidden" name="status" value="@((int)SessionStatus.IptalEdildi)" />
+                                    <button class="btn btn-sm btn-outline-warning">İptal</button>
+                                </form>
+                            }
+                            <a asp-action="EditSession" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                            <form asp-action="DeleteSession" asp-route-id="@s.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bu seans kaydı silinsin mi?');">
+                                <button class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-body px-4 pb-4">
+            @if (canAdd)
+            {
+                <form asp-action="AddSession" method="post" class="row g-2 align-items-end border-top pt-3"
+                      data-conflict-check data-conflict-url="@Url.Action("SessionConflicts")">
+                    <input type="hidden" name="MemberPackageId" value="@mp.Id" />
+                    <input type="hidden" name="ConfirmConflicts" value="false" />
+                    <div class="col-6 col-md-3">
+                        <label class="form-label small mb-1" for="sAt-@mp.Id">Tarih ve saat</label>
+                        <input id="sAt-@mp.Id" name="ScheduledAt" type="datetime-local" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <label class="form-label small mb-1" for="sStatus-@mp.Id">Durum</label>
+                        <select id="sStatus-@mp.Id" name="Status" class="form-select form-select-sm">
+                            @foreach (var st in Enum.GetValues<SessionStatus>())
+                            {
+                                <option value="@((int)st)">@st.DisplayName()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-5">
+                        <label class="form-label small mb-1" for="sNote-@mp.Id">Not</label>
+                        <input id="sNote-@mp.Id" name="Note" maxlength="500" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <button class="btn btn-sm btn-primary w-100">Seans ekle</button>
+                    </div>
+                    <div class="col-12 form-text mt-1">
+                        Seans numarası tarih sırasına göre otomatik verilir; araya daha erken bir tarih eklenirse sonraki seansların numarası kayar.
+                    </div>
+                </form>
+            }
+            else
+            {
+                <p class="small text-muted border-top pt-3 mb-0">
+                    @(mp.Status == MemberPackageStatus.Tamamlandi
+                        ? "Paketin tüm seansları yapıldı."
+                        : "Paketin tüm seansları planlandı. Yeni seans eklemek için bir seansı iptal edin.")
+                </p>
+            }
+        </div>
+    </div>
+}
+
+<div class="card admin-form-card"><div class="card-body p-4">
+    <h2 class="h5 mb-3">Yeni paket ekle</h2>
+    @if (Model.AvailablePackages.Count == 0)
+    {
+        <p class="text-muted mb-0">
+            Satışta paket yok. <a asp-controller="Campaigns" asp-action="Index" asp-route-section="packages">Kampanyalar › Paketler</a> bölümünden paket ekleyebilirsiniz.
+        </p>
+    }
+    else
+    {
+        <form asp-action="AddPackage" asp-route-id="@m.Id" method="post" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label asp-for="NewPackage.PackageId" class="form-label small mb-1"></label>
+                <select asp-for="NewPackage.PackageId" class="form-select form-select-sm" required>
+                    <option value="">Paket seçin</option>
+                    @foreach (var p in Model.AvailablePackages)
+                    {
+                        <option value="@p.Id">@p.Name · @p.SessionCount seans · @p.Price.ToLira()</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label asp-for="NewPackage.StartDate" class="form-label small mb-1"></label>
+                <input asp-for="NewPackage.StartDate" type="date" class="form-control form-control-sm" required />
+            </div>
+            <div class="col-6 col-md-2">
+                <label asp-for="NewPackage.EndDate" class="form-label small mb-1"></label>
+                <input asp-for="NewPackage.EndDate" type="date" class="form-control form-control-sm" />
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-sm btn-primary w-100">Paketi ekle</button>
+            </div>
+        </form>
+        <div class="form-text">Bitiş tarihi boş bırakılırsa süreli paketlerde geçerlilik süresinden hesaplanır.</div>
+    }
+</div></div>
+
+<partial name="_SessionConflictModal" />
+
+@section Scripts {
+    <script src="~/js/session-conflicts.js" asp-append-version="true"></script>
+}

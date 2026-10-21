@@ -21,10 +21,79 @@ public class AppDbContext : DbContext
     public DbSet<AboutPageSettings> AboutPageSettings => Set<AboutPageSettings>();
     public DbSet<AboutBlock> AboutBlocks => Set<AboutBlock>();
     public DbSet<AboutBlockImage> AboutBlockImages => Set<AboutBlockImage>();
+    public DbSet<Package> Packages => Set<Package>();
+    public DbSet<Member> Members => Set<Member>();
+    public DbSet<MemberPackage> MemberPackages => Set<MemberPackage>();
+    public DbSet<MemberSession> MemberSessions => Set<MemberSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Package>(entity =>
+        {
+            entity.ToTable("Packages");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(1000);
+            entity.Property(x => x.Price).HasPrecision(12, 2);
+
+            entity.HasIndex(x => new { x.IsActive, x.DisplayOrder });
+        });
+
+        modelBuilder.Entity<Member>(entity =>
+        {
+            entity.ToTable("Members");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.FirstName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.LastName).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.PasswordHash).HasMaxLength(200).IsRequired();
+
+            entity.HasIndex(x => x.Email).IsUnique();   // üye girişi e-posta ile yapılacak
+            entity.HasIndex(x => x.CreatedAt);
+        });
+
+        modelBuilder.Entity<MemberPackage>(entity =>
+        {
+            entity.ToTable("MemberPackages", table =>
+                table.HasCheckConstraint("CK_MemberPackages_DateRange", "[EndDate] IS NULL OR [EndDate] >= [StartDate]"));
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.StartDate).HasColumnType("date").IsRequired();
+            entity.Property(x => x.EndDate).HasColumnType("date");
+
+            entity.HasOne(x => x.Member)
+                .WithMany(x => x.Packages)
+                .HasForeignKey(x => x.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);   // üye silinirse paketleri de silinir
+
+            entity.HasOne(x => x.Package)
+                .WithMany()
+                .HasForeignKey(x => x.PackageId)
+                .OnDelete(DeleteBehavior.Restrict);  // satılmış paket silinemez, pasife alınır
+
+            entity.HasIndex(x => new { x.MemberId, x.StartDate });
+        });
+
+        modelBuilder.Entity<MemberSession>(entity =>
+        {
+            entity.ToTable("MemberSessions");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Note).HasMaxLength(500);
+
+            entity.HasOne(x => x.MemberPackage)
+                .WithMany(x => x.Sessions)
+                .HasForeignKey(x => x.MemberPackageId)
+                .OnDelete(DeleteBehavior.Cascade);   // paket kaydı silinirse seansları da silinir
+
+            entity.HasIndex(x => new { x.MemberPackageId, x.SessionNumber });
+            entity.HasIndex(x => new { x.Status, x.ScheduledAt });
+        });
 
         modelBuilder.Entity<Campaign>(entity =>
         {
@@ -90,6 +159,11 @@ public class AppDbContext : DbContext
             entity.Property(x => x.Message).HasMaxLength(2000).IsRequired();
 
             entity.HasIndex(x => new { x.IsRead, x.CreatedAt });
+
+            entity.HasOne(x => x.Member)
+                .WithMany()
+                .HasForeignKey(x => x.MemberId)
+                .OnDelete(DeleteBehavior.SetNull);   // üye silinse de mesaj kalır
         });
 
         modelBuilder.Entity<AvailabilityWindow>(entity =>

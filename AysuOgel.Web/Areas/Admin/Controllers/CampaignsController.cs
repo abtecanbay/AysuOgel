@@ -12,11 +12,13 @@ namespace AysuOgel.Web.Areas.Admin.Controllers;
 public class CampaignsController : Controller
 {
     private readonly ICampaignService _campaigns;
+    private readonly IPackageService _packages;
     private readonly IWebHostEnvironment _environment;
 
-    public CampaignsController(ICampaignService campaigns, IWebHostEnvironment environment)
+    public CampaignsController(ICampaignService campaigns, IPackageService packages, IWebHostEnvironment environment)
     {
         _campaigns = campaigns;
+        _packages = packages;
         _environment = environment;
     }
 
@@ -26,7 +28,8 @@ public class CampaignsController : Controller
         var model = new CampaignsDashboardViewModel
         {
             Campaigns = await _campaigns.GetAllAsync(),
-            PageSettings = await _campaigns.GetPageSettingsAsync()
+            PageSettings = await _campaigns.GetPageSettingsAsync(),
+            Packages = await _packages.GetAllAsync()
         };
         return View(model);
     }
@@ -123,7 +126,8 @@ public class CampaignsController : Controller
             var dashboard = new CampaignsDashboardViewModel
             {
                 Campaigns = await _campaigns.GetAllAsync(),
-                PageSettings = model
+                PageSettings = model,
+                Packages = await _packages.GetAllAsync()
             };
             return View("Index", dashboard);
         }

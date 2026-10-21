@@ -1,0 +1,42 @@
+@model MemberFormViewModel
+@{
+    ViewData["Title"] = "Yeni Üye";
+}
+
+<div class="admin-page-heading">
+    <div><p class="admin-eyebrow mb-1">ÜYE YÖNETİMİ</p><h1 class="h3 mb-0">@ViewData["Title"]</h1></div>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Üyelere dön</a>
+</div>
+<div class="card admin-form-card"><div class="card-body p-4">
+    <form asp-action="Create" method="post">
+        <partial name="_Form" model="Model" />
+        <div class="d-flex flex-wrap gap-2 mt-4"><button class="btn btn-primary px-4">Üyeyi kaydet</button><a asp-action="Index" class="btn btn-outline-secondary">İptal</a></div>
+    </form>
+</div></div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Süreli paket seçildiğinde, bitiş tarihi elle girilmediyse başlangıç + geçerlilik süresini öner.
+        (function () {
+            const select = document.getElementById('memberPackageSelect');
+            const start = document.getElementById('memberStartDate');
+            const end = document.getElementById('memberEndDate');
+            if (!select || !start || !end) return;
+            let suggested = '';
+
+            function suggest() {
+                const days = parseInt(select.selectedOptions[0]?.dataset.validityDays, 10);
+                if (end.value && end.value !== suggested) return;
+                if (!start.value || isNaN(days)) { if (end.value === suggested) end.value = ''; suggested = ''; return; }
+                const d = new Date(start.value + 'T00:00:00Z');
+                d.setUTCDate(d.getUTCDate() + days);
+                suggested = d.toISOString().slice(0, 10);
+                end.value = suggested;
+            }
+
+            select.addEventListener('change', suggest);
+            start.addEventListener('change', suggest);
+        })();
+    </script>
+}

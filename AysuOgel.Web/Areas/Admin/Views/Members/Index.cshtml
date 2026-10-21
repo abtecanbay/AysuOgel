@@ -1,0 +1,138 @@
+@model PagedResult<MemberListItem>
+@using AysuOgel.Business.Models
+@using AysuOgel.Web.Helpers
+@{
+    ViewData["Title"] = "Üyeler";
+    var f = ViewData["Filter"] as MemberFilter ?? new MemberFilter();
+    var packages = ViewData["Packages"] as List<Package> ?? [];
+    var hasFilter = f.PackageId.HasValue
+        || f.Status.HasValue
+        || !string.IsNullOrWhiteSpace(f.Name)
+        || !string.IsNullOrWhiteSpace(f.Phone)
+        || !string.IsNullOrWhiteSpace(f.Email)
+        || f.StartFrom.HasValue
+        || f.StartTo.HasValue;
+}
+
+<form method="get" asp-action="Index">
+    @if (!string.IsNullOrEmpty(f.Sort))
+    {
+        <input type="hidden" name="Sort" value="@f.Sort" />
+        <input type="hidden" name="PageSize" value="@f.PageSize" />
+    }
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+        <h1 class="h3 mb-0">Üyeler</h1>
+        <select name="PackageId" class="form-select form-select-sm w-auto" aria-label="Pakete göre filtrele"
+                onchange="this.form.submit()">
+            <option value="">Tüm paketler</option>
+            @foreach (var p in packages)
+            {
+                <option value="@p.Id" selected="@(f.PackageId == p.Id)">@p.Name</option>
+            }
+        </select>
+        <select name="Status" class="form-select form-select-sm w-auto" aria-label="Paket durumuna göre filtrele"
+                onchange="this.form.submit()">
+            <option value="">Tüm durumlar</option>
+            @foreach (var s in Enum.GetValues<MemberPackageStatus>())
+            {
+                <option value="@((int)s)" selected="@(f.Status == s)">@s.DisplayName()</option>
+            }
+        </select>
+        <a asp-action="Create" class="btn btn-sm btn-primary ms-auto">+ Yeni Üye</a>
+    </div>
+
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fName">Ad Soyad</label>
+            <input id="fName" name="Name" value="@f.Name" class="form-control form-control-sm" autocomplete="off" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fPhone">Telefon</label>
+            <input id="fPhone" name="Phone" value="@f.Phone" class="form-control form-control-sm" autocomplete="off" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fEmail">E-posta</label>
+            <input id="fEmail" name="Email" value="@f.Email" class="form-control form-control-sm" autocomplete="off" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fFrom">Başlama: başlangıç</label>
+            <input id="fFrom" type="date" name="StartFrom" value="@f.StartFrom?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1" for="fTo">Başlama: bitiş</label>
+            <input id="fTo" type="date" name="StartTo" value="@f.StartTo?.ToString("yyyy-MM-dd")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button class="btn btn-sm btn-primary">Filtrele</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Temizle</a>
+        </div>
+    </div>
+</form>
+
+@if (TempData["MemberSuccess"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+
+<p class="text-muted small">@Model.TotalCount kayıt@(hasFilter ? " (filtreli)" : "")</p>
+
+<div class="table-responsive">
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th aria-sort="@(f.Descending ? "descending" : "ascending")">
+                <partial name="_SortLink" model="@(new SortLinkModel("Kayıt", f.Descending))" />
+            </th>
+            <th>Ad Soyad</th>
+            <th>Telefon</th>
+            <th>Paket</th>
+            <th>Seans</th>
+            <th>Başlama</th>
+            <th>Bitiş</th>
+            <th>Durum</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Model.Items)
+        {
+            <tr>
+                <td class="text-nowrap">@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy")</td>
+                <td>
+                    <div class="fw-semibold">@m.FirstName @m.LastName</div>
+                    <div class="small text-muted">@m.Email</div>
+                </td>
+                <td class="text-nowrap">@m.Phone</td>
+                <td>
+                    @(m.PackageName ?? "-")
+                    @if (m.PackageCount > 1)
+                    {
+                        <div class="small text-muted">+@(m.PackageCount - 1) paket daha</div>
+                    }
+                </td>
+                <td class="text-nowrap">@(m.TotalSessions > 0 ? $"{m.DoneSessions} / {m.TotalSessions}" : "-")</td>
+                <td class="text-nowrap">@(m.StartDate?.ToString("dd.MM.yyyy") ?? "-")</td>
+                <td class="text-nowrap">@(m.EndDate?.ToString("dd.MM.yyyy") ?? "-")</td>
+                <td>
+                    @if (m.Status is { } status)
+                    {
+                        <partial name="_MemberPackageStatusBadge" model="status" />
+                    }
+                </td>
+                <td class="text-end">
+                    <a asp-action="Details" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Detay</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+<partial name="_Pager" model="Model" />
+
+@if (Model.TotalCount == 0)
+{
+    <p class="text-muted">@(hasFilter ? "Filtreye uyan üye yok." : "Henüz üye kaydı yok.")</p>
+}

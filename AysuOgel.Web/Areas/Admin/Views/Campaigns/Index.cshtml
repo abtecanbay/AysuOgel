@@ -4,6 +4,7 @@
     var activeSection = Context.Request.Query["section"].ToString();
     var bannerExpanded = string.IsNullOrEmpty(activeSection) || activeSection == "banner";
     var campaignsExpanded = activeSection == "campaigns";
+    var packagesExpanded = activeSection == "packages";
 }
 
 <div class="admin-page-heading">
@@ -22,6 +23,10 @@
 @if (TempData["CampaignSettingsSuccess"] is string settingsSuccess)
 {
     <div class="alert alert-success" role="status">@settingsSuccess</div>
+}
+@if (TempData["CampaignError"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
 }
 
 <div class="accordion admin-campaigns-accordion" id="campaignsAdminAccordion">
@@ -43,7 +48,7 @@
         </div>
     </div>
 
-    <div class="accordion-item admin-table-card">
+    <div class="accordion-item admin-table-card mb-3">
         <h2 class="accordion-header" id="campaignListHeading">
             <button class="accordion-button @(campaignsExpanded ? "" : "collapsed")" type="button" data-bs-toggle="collapse"
                     data-bs-target="#campaignListPanel" aria-expanded="@(campaignsExpanded ? "true" : "false")" aria-controls="campaignListPanel">
@@ -57,6 +62,24 @@
              aria-labelledby="campaignListHeading" data-bs-parent="#campaignsAdminAccordion">
             <div class="accordion-body">
                 <partial name="_CampaignList" model="Model.Campaigns" />
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item admin-table-card">
+        <h2 class="accordion-header" id="packageListHeading">
+            <button class="accordion-button @(packagesExpanded ? "" : "collapsed")" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#packageListPanel" aria-expanded="@(packagesExpanded ? "true" : "false")" aria-controls="packageListPanel">
+                <span>
+                    <span class="d-block fw-semibold">3. Paketler</span>
+                    <span class="d-block small text-muted fw-normal">@Model.Packages.Count kayıt · üyelere satılan seans paketleri</span>
+                </span>
+            </button>
+        </h2>
+        <div id="packageListPanel" class="accordion-collapse collapse @(packagesExpanded ? "show" : "")"
+             aria-labelledby="packageListHeading" data-bs-parent="#campaignsAdminAccordion">
+            <div class="accordion-body">
+                <partial name="_PackageList" model="Model.Packages" />
             </div>
         </div>
     </div>

@@ -7,7 +7,10 @@ public enum ContactSubject
     [Display(Name = "Bilgi almak istiyorum")] BilgiAlma = 1,
     [Display(Name = "Randevu talebi")] RandevuTalebi = 2,
     [Display(Name = "Hizmetler hakkında soru")] HizmetSorusu = 3,
-    [Display(Name = "Diğer")] Diger = 4
+    [Display(Name = "Diğer")] Diger = 4,
+
+    /// <summary>Yalnızca seans sorgulama girişi yapmış üyeler seçebilir.</summary>
+    [Display(Name = "Seans saati değişikliği")] SeansDegisikligi = 5
 }
 
 public enum MessageStatus
@@ -42,6 +45,10 @@ public class ContactMessage
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? RequestedAppointmentAt { get; set; }
+
+    /// <summary>Mesaj, seans sorgulama girişi yapmış bir üyeden geldiyse.</summary>
+    public int? MemberId { get; set; }
+    public Member? Member { get; set; }
 
     /// <summary>İlk başarılı/kuyruklanmış yanıtın zamanı (UTC). Doluysa mesaj "Cevaplandı" sayılır.</summary>
     public DateTime? RepliedAt { get; set; }

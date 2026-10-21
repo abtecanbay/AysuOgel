@@ -1,0 +1,41 @@
+@model MemberLoginViewModel
+@{
+    ViewData["Title"] = "Seans Sorgula";
+}
+
+<section class="page-head reveal">
+    <h1 class="display-6 fw-bold section-title">Seans Sorgula</h1>
+    <p class="lead mb-0">Paketinizi ve seanslarınızı görmek için kayıt sırasında verilen e-posta ve şifrenizle giriş yapın.</p>
+</section>
+
+<div class="row justify-content-center mb-4">
+    <div class="col-md-8 col-lg-5">
+        <div class="card member-login-card">
+            <div class="card-body p-4">
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" autocomplete="username" autofocus />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <button class="btn btn-brand w-100">Giriş yap</button>
+                </form>
+                <p class="small text-muted mt-3 mb-0">
+                    Şifrenizi bilmiyorsanız ya da hesabınız yoksa
+                    <a asp-controller="Contact" asp-action="Index">bizimle iletişime geçin</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
