@@ -1,0 +1,15 @@
+@model SessionStatus
+@using AysuOgel.Web.Helpers
+
+@switch (Model)
+{
+    case SessionStatus.Yapildi:
+        <span class="badge bg-success">@Model.DisplayName()</span>
+        break;
+    case SessionStatus.IptalEdildi:
+        <span class="badge bg-secondary">@Model.DisplayName()</span>
+        break;
+    default:
+        <span class="badge bg-warning text-dark">@Model.DisplayName()</span>
+        break;
+}

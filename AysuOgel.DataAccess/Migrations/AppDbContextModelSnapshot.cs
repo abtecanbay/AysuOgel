@@ -356,6 +356,9 @@ namespace AysuOgel.DataAccess.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
 
+                    b.Property<int?>("MemberId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(2000)
@@ -377,9 +380,143 @@ namespace AysuOgel.DataAccess.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MemberId");
+
                     b.HasIndex("IsRead", "CreatedAt");
 
                     b.ToTable("ContactMessages", (string)null);
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.Member", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Members", (string)null);
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MemberPackage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PackageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SessionCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageId");
+
+                    b.HasIndex("MemberId", "StartDate");
+
+                    b.ToTable("MemberPackages", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MemberPackages_DateRange", "[EndDate] IS NULL OR [EndDate] >= [StartDate]");
+                        });
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MemberSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MemberPackageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SessionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberPackageId", "SessionNumber");
+
+                    b.HasIndex("Status", "ScheduledAt");
+
+                    b.ToTable("MemberSessions", (string)null);
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.MessageReply", b =>
@@ -428,6 +565,52 @@ namespace AysuOgel.DataAccess.Migrations
                     b.HasIndex("DeliveryStatus", "CreatedAt");
 
                     b.ToTable("MessageReplies", (string)null);
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.Package", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<int>("SessionCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ValidityDays")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive", "DisplayOrder");
+
+                    b.ToTable("Packages", (string)null);
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.Service", b =>
@@ -536,6 +719,46 @@ namespace AysuOgel.DataAccess.Migrations
                     b.Navigation("ContactMessage");
                 });
 
+            modelBuilder.Entity("AysuOgel.Entities.Entities.ContactMessage", b =>
+                {
+                    b.HasOne("AysuOgel.Entities.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MemberPackage", b =>
+                {
+                    b.HasOne("AysuOgel.Entities.Entities.Member", "Member")
+                        .WithMany("Packages")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AysuOgel.Entities.Entities.Package", "Package")
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Package");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MemberSession", b =>
+                {
+                    b.HasOne("AysuOgel.Entities.Entities.MemberPackage", "MemberPackage")
+                        .WithMany("Sessions")
+                        .HasForeignKey("MemberPackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MemberPackage");
+                });
+
             modelBuilder.Entity("AysuOgel.Entities.Entities.MessageReply", b =>
                 {
                     b.HasOne("AysuOgel.Entities.Entities.ContactMessage", "ContactMessage")
@@ -550,6 +773,16 @@ namespace AysuOgel.DataAccess.Migrations
             modelBuilder.Entity("AysuOgel.Entities.Entities.AboutBlock", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.Member", b =>
+                {
+                    b.Navigation("Packages");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.MemberPackage", b =>
+                {
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

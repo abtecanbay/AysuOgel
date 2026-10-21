@@ -1,6 +1,7 @@
 using AysuOgel.Business.Abstract;
 using AysuOgel.Business.Concrete;
 using AysuOgel.DataAccess.Contexts;
+using AysuOgel.Web.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,8 @@ builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IEmailSender, NotConfiguredEmailSender>();
 builder.Services.AddScoped<IMessageReplyService, MessageReplyService>();
 builder.Services.AddScoped<ISuccessStoryService, SuccessStoryService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
 
 builder.Services.AddRateLimiter(o =>
 {
@@ -58,6 +61,18 @@ builder.Services.AddRateLimiter(o =>
                 QueueLimit = 0,
                 AutoReplenishment = true
             }));
+
+    // Aynı IP'den üye girişine (seans sorgulama) 15 dakikada en fazla 10 deneme.
+    o.AddPolicy("member-login", http =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(15),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
 });
 
 builder.Services.AddControllersWithViews();
@@ -74,6 +89,19 @@ builder.Services
         o.Cookie.SameSite = SameSiteMode.Lax;
         o.Cookie.Path = "/";
         o.ExpireTimeSpan = TimeSpan.FromHours(8);
+        o.SlidingExpiration = true;
+    })
+    // Üyelerin seans sorgulama oturumu; yönetici oturumundan tamamen ayrıdır.
+    .AddCookie(MemberAuth.Scheme, o =>
+    {
+        o.LoginPath = "/seans-sorgula";
+        o.AccessDeniedPath = "/seans-sorgula";
+        o.Cookie.Name = "__Host-AysuOgel.Member";
+        o.Cookie.HttpOnly = true;
+        o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        o.Cookie.SameSite = SameSiteMode.Lax;
+        o.Cookie.Path = "/";
+        o.ExpireTimeSpan = TimeSpan.FromHours(2);
         o.SlidingExpiration = true;
     });
 

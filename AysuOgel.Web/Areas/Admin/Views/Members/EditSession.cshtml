@@ -1,0 +1,57 @@
+@model SessionFormViewModel
+@using AysuOgel.Web.Helpers
+@{
+    var session = (MemberSession)ViewData["Session"]!;
+    var mp = session.MemberPackage;
+    ViewData["Title"] = "Seansı Düzenle";
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">@mp.Member.FirstName @mp.Member.LastName · @mp.Package.Name</p>
+        <h1 class="h3 mb-0">@(session.Status == SessionStatus.IptalEdildi ? "İptal edilen seans" : $"{session.SessionNumber}. seans")</h1>
+    </div>
+    <a asp-action="Details" asp-route-id="@mp.MemberId" asp-fragment="package-@mp.Id" class="btn btn-outline-secondary">← Üye detayına dön</a>
+</div>
+<div class="card admin-form-card"><div class="card-body p-4">
+    <form asp-action="EditSession" asp-route-id="@Model.Id" method="post"
+          data-conflict-check data-conflict-url="@Url.Action("SessionConflicts")" data-except-id="@Model.Id"
+          data-original-at="@session.ScheduledAt.ToString("yyyy-MM-ddTHH:mm")" data-original-status="@session.Status">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" name="ConfirmConflicts" value="false" />
+        <div class="row g-3">
+            <div class="col-sm-8 col-lg-4">
+                <label asp-for="ScheduledAt" class="form-label"></label>
+                <input asp-for="ScheduledAt" type="datetime-local" class="form-control"
+                       value="@Model.ScheduledAt?.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="ScheduledAt" class="text-danger"></span>
+            </div>
+            <div class="col-sm-4 col-lg-3">
+                <label asp-for="Status" class="form-label"></label>
+                <select asp-for="Status" class="form-select">
+                    @foreach (var st in Enum.GetValues<SessionStatus>())
+                    {
+                        <option value="@st" selected="@(Model.Status == st)">@st.DisplayName()</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <label asp-for="Note" class="form-label"></label>
+                <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-primary px-4">Kaydet</button>
+            <a asp-action="Details" asp-route-id="@mp.MemberId" asp-fragment="package-@mp.Id" class="btn btn-outline-secondary">İptal</a>
+        </div>
+    </form>
+</div></div>
+
+<partial name="_SessionConflictModal" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/session-conflicts.js" asp-append-version="true"></script>
+}

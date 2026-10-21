@@ -1,0 +1,28 @@
+@* Seans formlarında (data-conflict-check) kaydetmeden önce çakışma varsa açılır; içerik session-conflicts.js ile doldurulur. *@
+<div class="modal fade" id="sessionConflictModal" tabindex="-1" aria-labelledby="sessionConflictTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="sessionConflictTitle">⚠ Randevu çakışması</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <p id="sessionConflictMessage" class="mb-3"></p>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>Ad Soyad</th><th>Satın aldığı paket</th><th>Seans</th><th>Randevu tarihi</th><th>Fark</th></tr></thead>
+                        <tbody id="sessionConflictRows"></tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mt-3 mb-0">
+                    Seçilen saatin 1 saat öncesi ve sonrası içindeki, iptal edilmemiş seanslar listelenir.
+                    Cihaz ve hizmet kapasiteniz yeterliyse kaydı yine de oluşturabilirsiniz.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Vazgeç, saati değiştireyim</button>
+                <button type="button" class="btn btn-warning" id="sessionConflictConfirm">Yine de kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,10 @@
 ﻿using System.Globalization;
+using System.Security.Claims;
 using AysuOgel.Business.Abstract;
 using AysuOgel.Entities.Entities;
+using AysuOgel.Web.Helpers;
 using AysuOgel.Web.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -12,21 +15,56 @@ public class ContactController : Controller
     private readonly IContactService _contacts;
     private readonly IAppointmentService _appointments;
     private readonly IAppointmentSlotService _slots;
+    private readonly IMemberService _members;
 
     public ContactController(
         IContactService contacts,
         IAppointmentService appointments,
-        IAppointmentSlotService slots)
+        IAppointmentSlotService slots,
+        IMemberService members)
     {
         _contacts = contacts;
         _appointments = appointments;
         _slots = slots;
+        _members = members;
     }
 
     // /iletisim  veya  /iletisim?subject=RandevuTalebi
+    // Üye girişi varsa: /iletisim?subject=SeansDegisikligi
     [HttpGet("iletisim")]
-    public IActionResult Index(ContactSubject? subject = null) =>
-        View(new ContactFormViewModel { Subject = subject });
+    public async Task<IActionResult> Index(ContactSubject? subject = null)
+    {
+        var member = await SignedInMemberAsync();
+        var model = new ContactFormViewModel
+        {
+            Subject = subject == ContactSubject.SeansDegisikligi && member is null ? null : subject
+        };
+
+        if (member is not null)
+        {
+            model.FirstName = member.FirstName;
+            model.LastName = member.LastName;
+            model.Email = member.Email;
+            model.Phone = member.Phone;
+        }
+        return View(model);
+    }
+
+    /// <summary>Seans sorgulama oturumu açık ve geçerliyse üyeyi döner.</summary>
+    private async Task<Member?> SignedInMemberAsync()
+    {
+        var auth = await HttpContext.AuthenticateAsync(MemberAuth.Scheme);
+        if (!auth.Succeeded
+            || !int.TryParse(auth.Principal.FindFirstValue(ClaimTypes.NameIdentifier), out var id))
+            return null;
+
+        var member = await _members.GetByIdAsync(id);
+        var stamp = auth.Principal.FindFirstValue(MemberAuth.PasswordStampClaim);
+        var valid = member is not null && stamp == MemberAuth.PasswordStamp(member.PasswordHash);
+
+        ViewData["SignedInMember"] = valid ? member : null;
+        return valid ? member : null;
+    }
 
     // Seçilen tarihin saatleri: /iletisim/saatler?date=2026-10-18
     [HttpGet("iletisim/saatler")]
@@ -50,6 +88,11 @@ public class ContactController : Controller
             TempData["ContactSuccess"] = SuccessText;
             return RedirectToAction(nameof(Index));
         }
+
+        var member = await SignedInMemberAsync();
+        if (model.Subject == ContactSubject.SeansDegisikligi && member is null)
+            ModelState.AddModelError(nameof(model.Subject),
+                "Seans saati değişikliği için önce Seans Sorgula sayfasından giriş yapın.");
 
         DateTime? appointmentAt = null;
         if (model.Subject == ContactSubject.RandevuTalebi)
@@ -80,7 +123,8 @@ public class ContactController : Controller
             Email = model.Email.Trim(),
             Phone = model.Phone.Trim(),
             Subject = model.Subject!.Value,
-            Message = model.Message.Trim()
+            Message = model.Message.Trim(),
+            MemberId = member?.Id
         };
 
         if (appointmentAt is null)

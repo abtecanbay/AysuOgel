@@ -634,6 +634,26 @@ a {
     margin-bottom: .9rem;
 }
 
+.contact-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+    .contact-whatsapp:hover,
+    .contact-whatsapp:focus-visible {
+        color: #128c4a;
+        text-decoration: underline;
+    }
+
+.contact-whatsapp-icon {
+    flex-shrink: 0;
+    color: #25d366;
+}
+
 .contact-map {
     overflow: hidden;
     aspect-ratio: 4 / 3;
@@ -1112,3 +1132,46 @@ a {
     .campaign-date-badge { left: .6rem; bottom: .6rem; max-width: calc(100% - 1.2rem); font-size: .68rem; }
     .campaign-card-body { padding: 1rem 1rem 1.25rem; }
 }
+
+/* Üye seans sorgulama */
+.member-login-card:hover, .member-package-card:hover { transform: none; }
+.member-next {
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--grad-dark);
+    color: #fff;
+    box-shadow: var(--shadow-soft);
+}
+.member-next-label { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; opacity: .85; }
+.member-chip-active { background: var(--c-mint); color: var(--c-primary-dark); }
+.member-chip-done { background: #e3f1fb; color: var(--c-blue); }
+.member-progress { height: .55rem; border-radius: 999px; background: var(--c-mint); }
+.member-progress .progress-bar { background: var(--grad); }
+.member-session-list { display: grid; gap: .5rem; }
+.member-session {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: .7rem .9rem;
+    border-radius: .9rem;
+    background: #f7fbfa;
+}
+.member-session-no {
+    flex: 0 0 2.1rem;
+    height: 2.1rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-weight: 700;
+    background: #fff;
+    color: var(--c-muted);
+    border: 2px solid #d6e7e4;
+}
+.member-session-status { font-size: .8rem; font-weight: 700; white-space: nowrap; }
+.member-session.is-done .member-session-no { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+.member-session.is-done .member-session-status { color: var(--c-primary-dark); }
+.member-session.is-planned { background: #fff8e6; }
+.member-session.is-planned .member-session-no { border-color: #f0b429; color: #8a5a00; }
+.member-session.is-planned .member-session-status { color: #8a5a00; }
+.member-session.is-cancelled { opacity: .6; }
+.member-session.is-cancelled .member-session-status { color: var(--c-muted); text-decoration: line-through; }

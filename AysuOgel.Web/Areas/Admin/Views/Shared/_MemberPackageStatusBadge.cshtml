@@ -1,0 +1,11 @@
+@model MemberPackageStatus
+@using AysuOgel.Web.Helpers
+
+@if (Model == MemberPackageStatus.Tamamlandi)
+{
+    <span class="badge bg-primary">@Model.DisplayName()</span>
+}
+else
+{
+    <span class="badge bg-success">@Model.DisplayName()</span>
+}

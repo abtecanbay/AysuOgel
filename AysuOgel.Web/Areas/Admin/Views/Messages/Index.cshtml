@@ -74,10 +74,18 @@
     <tbody>
         @foreach (var m in Model.Items)
         {
-            <tr class="@(m.Status == MessageStatus.Yeni ? "fw-bold" : "")">
+            @* Üyeden gelen seans değişikliği talebi gözden kaçmasın diye açık sarı vurgulanır. *@
+            var memberRequest = m.Subject == ContactSubject.SeansDegisikligi;
+            <tr class="@(m.Status == MessageStatus.Yeni ? "fw-bold" : "") @(memberRequest ? "table-warning" : "")">
                 <td>@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</td>
                 <td>@m.FirstName @m.LastName</td>
-                <td>@m.Subject.DisplayName()</td>
+                <td>
+                    @m.Subject.DisplayName()
+                    @if (memberRequest)
+                    {
+                        <span class="badge text-bg-warning fw-semibold ms-1">Üye talebi</span>
+                    }
+                </td>
                 <td>@m.Phone</td>
                 <td>@(m.RequestedAppointmentAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
                 <td><partial name="_MessageStatusBadge" model="m.Status" /></td>
