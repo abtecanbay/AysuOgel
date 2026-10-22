@@ -290,12 +290,38 @@ public class MemberService : IMemberService
         var error = ValidateSession(memberPackage, entity.ScheduledAt, status, entity.Id);
         if (error is not null) return error;
 
+        // Seans planlanan saatten önce yapıldı olarak işaretlenirse bunu nota düşer.
+        var now = TurkeyNow();
+        if (status == SessionStatus.Yapildi && entity.Status != SessionStatus.Yapildi && now < entity.ScheduledAt)
+            entity.Note = AppendNote(entity.Note,
+                $"{entity.ScheduledAt:dd.MM.yyyy HH:mm} tarihinde planlanmıştı, {now:dd.MM.yyyy HH:mm} tarihinde yapıldı.");
+
         entity.Status = status;
         entity.UpdatedAt = DateTime.UtcNow;
 
         SessionsChanged(memberPackage);
         await _db.SaveChangesAsync();
         return null;
+    }
+
+    private const int NoteMaxLength = 500;
+
+    // Türkiye kalıcı olarak UTC+3 kullanıyor.
+    private static DateTime TurkeyNow() => DateTime.UtcNow.AddHours(3);
+
+    /// <summary>
+    /// Mevcut notun sonuna ekler. Sığmazsa yeni not korunur, eski not kısaltılır.
+    /// </summary>
+    private static string AppendNote(string? existing, string addition)
+    {
+        existing = existing?.Trim();
+        if (string.IsNullOrEmpty(existing)) return addition;
+
+        var room = NoteMaxLength - addition.Length - 1;
+        if (room <= 0) return addition;
+        if (existing.Length > room) existing = existing[..(room - 1)].TrimEnd() + "…";
+
+        return $"{existing} {addition}";
     }
 
     public async Task DeleteSessionAsync(int sessionId)
