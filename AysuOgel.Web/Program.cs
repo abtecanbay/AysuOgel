@@ -31,6 +31,7 @@ builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<ISiteSettingsService, SiteSettingsService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IAdminPageService, AdminPageService>();
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 builder.Services.AddMemoryCache();
 
 builder.Services.AddRateLimiter(o =>
@@ -80,8 +81,13 @@ builder.Services.AddRateLimiter(o =>
             }));
 });
 
-// Panelden eklenen yöneticiler yalnızca kendilerine atanan sayfalara erişebilir.
-builder.Services.AddControllersWithViews(o => o.Filters.Add<AdminPageAccessFilter>());
+// Panelden eklenen yöneticiler yalnızca kendilerine atanan sayfalara erişebilir;
+// paneldeki her değişiklik işlem geçmişine yazılır.
+builder.Services.AddControllersWithViews(o =>
+{
+    o.Filters.Add<AdminPageAccessFilter>();
+    o.Filters.Add<AdminActivityLogFilter>();
+});
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

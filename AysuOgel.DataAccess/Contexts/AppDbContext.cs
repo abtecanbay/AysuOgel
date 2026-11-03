@@ -29,10 +29,31 @@ public class AppDbContext : DbContext
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<AdminPage> AdminPages => Set<AdminPage>();
     public DbSet<AdminUserPage> AdminUserPages => Set<AdminUserPage>();
+    public DbSet<AdminActivityLog> AdminActivityLogs => Set<AdminActivityLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AdminActivityLog>(entity =>
+        {
+            entity.ToTable("AdminActivityLogs");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Username).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.FullName).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.Category).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Controller).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Action).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.EntityId).HasMaxLength(50);
+            entity.Property(x => x.Target).HasMaxLength(200);
+            entity.Property(x => x.Description).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.IpAddress).HasMaxLength(45);
+
+            // Yönetici silinse de geçmişi kalsın diye AdminUsers'a yabancı anahtar yok.
+            entity.HasIndex(x => x.CreatedAt);
+            entity.HasIndex(x => new { x.AdminUserId, x.CreatedAt });
+        });
 
         modelBuilder.Entity<SiteSettings>(entity =>
         {

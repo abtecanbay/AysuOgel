@@ -11,8 +11,11 @@ namespace AysuOgel.Web.Helpers;
 /// </summary>
 public class AdminPageAccessFilter : IAsyncAuthorizationFilter
 {
-    /// <summary>Yetki denetiminden muaf controller'lar (giriş/çıkış, yetkisiz sayfası).</summary>
-    private static readonly HashSet<string> Exempt = new(StringComparer.OrdinalIgnoreCase) { "Account" };
+    /// <summary>
+    /// Yetki denetiminden muaf controller'lar: giriş/çıkış, yetkisiz sayfası ve işlem geçmişi
+    /// (her yönetici kendi geçmişini görür; başkalarınınkini yalnızca ana yönetici görür).
+    /// </summary>
+    private static readonly HashSet<string> Exempt = new(StringComparer.OrdinalIgnoreCase) { "Account", "ActivityLog" };
 
     private readonly IAdminPageService _pages;
     public AdminPageAccessFilter(IAdminPageService pages) => _pages = pages;

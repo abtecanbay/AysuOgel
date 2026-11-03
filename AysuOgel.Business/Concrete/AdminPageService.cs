@@ -49,6 +49,9 @@ public class AdminPageService : IAdminPageService
         return (await GetCachedPageIdsAsync(adminUserId.Value)).Contains(page.Id);
     }
 
+    public async Task<AdminPage?> FindByControllerAsync(string controller) =>
+        (await GetAllCachedAsync()).FirstOrDefault(p => Matches(p, controller));
+
     public Task<List<int>> GetPageIdsAsync(int adminUserId) =>
         _db.AdminUserPages.AsNoTracking()
             .Where(x => x.AdminUserId == adminUserId)

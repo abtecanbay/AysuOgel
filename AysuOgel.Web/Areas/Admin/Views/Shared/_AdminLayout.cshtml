@@ -45,6 +45,14 @@
                                    asp-area="Admin" asp-controller="@adminPage.Controller" asp-action="Index">@adminPage.Title</a>
                             </li>
                         }
+                        @{
+                            // İşlem geçmişi herkese açıktır: ana yönetici tüm kayıtları, diğerleri kendi kayıtlarını görür.
+                            var logActive = string.Equals(currentController, "ActivityLog", StringComparison.OrdinalIgnoreCase);
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link @(logActive ? "active" : "")" aria-current="@(logActive ? "page" : null)"
+                               asp-area="Admin" asp-controller="ActivityLog" asp-action="Index">@(User.GetAdminUserId() is null ? "İşlem Kayıtları" : "İşlem Geçmişim")</a>
+                        </li>
                     </ul>
                     <div class="d-flex align-items-center gap-3 py-2">
                         <span class="small text-white-50 d-none d-xl-inline">@(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name)</span>

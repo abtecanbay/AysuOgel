@@ -20,6 +20,9 @@ public interface IAdminPageService
     /// </summary>
     Task<bool> CanAccessAsync(int? adminUserId, string controller);
 
+    /// <summary>Controller'ın (veya yardımcı controller'ın) bağlı olduğu sayfa; yoksa null.</summary>
+    Task<AdminPage?> FindByControllerAsync(string controller);
+
     /// <summary>Yöneticiye atanmış sayfa kimlikleri.</summary>
     Task<List<int>> GetPageIdsAsync(int adminUserId);
 

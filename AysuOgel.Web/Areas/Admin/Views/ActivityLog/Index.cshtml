@@ -1,0 +1,174 @@
+@model ActivityLogViewModel
+@using AysuOgel.Business.Models
+@{
+    var f = Model.Filter;
+    var title = Model.IsSystemAdmin ? "İşlem Kayıtları" : "İşlem Geçmişim";
+    ViewData["Title"] = title;
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">@(Model.IsSystemAdmin ? "TÜM YÖNETİCİLER" : "HESABIM")</p>
+        <h1 class="h3 mb-1">@title</h1>
+        <p class="text-muted mb-0">
+            @if (Model.IsSystemAdmin)
+            {
+                @:Yöneticilerin panelde yaptığı ekleme, güncelleme, silme ve giriş/çıkış işlemleri.
+            }
+            else
+            {
+                @:Panelde yaptığınız ekleme, güncelleme, silme ve giriş/çıkış işlemleri.
+            }
+        </p>
+    </div>
+</div>
+
+<form method="get" asp-action="Index" class="card p-3 mb-3">
+    <input type="hidden" name="PageSize" value="@f.PageSize" />
+    @if (!string.IsNullOrEmpty(f.Sort))
+    {
+        <input type="hidden" name="Sort" value="@f.Sort" />
+    }
+    <div class="row g-2 align-items-end">
+        @if (Model.IsSystemAdmin)
+        {
+            <div class="col-md-3 col-lg-2">
+                <label class="form-label small mb-1" for="fAdmin">Yönetici</label>
+                <select id="fAdmin" name="Admin" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">Tüm yöneticiler</option>
+                    <option value="system" selected="@(f.Admin == "system")">
+                        Ana yönetici@(string.IsNullOrEmpty(Model.SystemAdminUsername) ? "" : $" ({Model.SystemAdminUsername})")
+                    </option>
+                    @foreach (var a in Model.Admins)
+                    {
+                        <option value="@a.Id" selected="@(f.Admin == a.Id.ToString())">
+                            @a.FullName (@a.Username)@(a.IsActive ? "" : " – pasif")
+                        </option>
+                    }
+                </select>
+            </div>
+        }
+        <div class="col-md-3 col-lg-2">
+            <label class="form-label small mb-1" for="fCategory">Sayfa</label>
+            <select id="fCategory" name="Category" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">Tüm sayfalar</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c" selected="@(f.Category == c)">@c</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <label class="form-label small mb-1" for="fSearch">Ara</label>
+            <input id="fSearch" name="Search" value="@f.Search" class="form-control form-control-sm"
+                   placeholder="Açıklama, kayıt adı@(Model.IsSystemAdmin ? ", yönetici" : "")…" autocomplete="off" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-1">
+            <label class="form-label small mb-1" for="fFrom">Başlangıç</label>
+            <input id="fFrom" type="date" name="From" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-1">
+            <label class="form-label small mb-1" for="fTo">Bitiş</label>
+            <input id="fTo" type="date" name="To" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-6 col-lg-3 d-flex flex-wrap align-items-center gap-2">
+            <div class="form-check mb-0 me-1">
+                <input class="form-check-input" type="checkbox" id="fFailed" name="FailedOnly" value="true" checked="@f.FailedOnly" />
+                <label class="form-check-label small" for="fFailed">Yalnızca başarısız</label>
+            </div>
+            <button class="btn btn-sm btn-primary">Filtrele</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Temizle</a>
+        </div>
+    </div>
+</form>
+
+<p class="text-muted small">@Model.Logs.TotalCount kayıt@(Model.HasFilter ? " (filtreli)" : "")</p>
+
+@if (Model.Logs.TotalCount == 0)
+{
+    <div class="card p-4 text-center text-muted">
+        @(Model.HasFilter ? "Filtreye uyan kayıt yok." : "Henüz kayıtlı işlem yok.")
+    </div>
+}
+else
+{
+    <div class="card admin-table-card">
+        <div class="table-responsive">
+            <table class="table align-middle activity-log-table">
+                <thead>
+                    <tr>
+                        <th aria-sort="@(f.Descending ? "descending" : "ascending")">
+                            <partial name="_SortLink" model="@(new SortLinkModel("Tarih", f.Descending))" />
+                        </th>
+                        @if (Model.IsSystemAdmin)
+                        {
+                            <th>Yönetici</th>
+                        }
+                        <th>Sayfa</th>
+                        <th>İşlem</th>
+                        <th>Durum</th>
+                        @if (Model.IsSystemAdmin)
+                        {
+                            <th>IP</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.Logs.Items)
+                    {
+                        var local = log.CreatedAt.ToTurkeyTime();
+                        <tr class="@(log.IsSuccess ? "" : "table-danger")">
+                            <td class="text-nowrap">
+                                <span class="d-block fw-semibold">@local.ToString("dd.MM.yyyy")</span>
+                                <span class="small text-muted">@local.ToString("HH:mm:ss")</span>
+                            </td>
+                            @if (Model.IsSystemAdmin)
+                            {
+                                <td>
+                                    <span class="d-block fw-semibold">@log.FullName</span>
+                                    <span class="small text-muted">
+                                        @log.Username
+                                        @if (log.IsSystemAdmin)
+                                        {
+                                            <span class="badge activity-log-badge-system ms-1">Ana yönetici</span>
+                                        }
+                                    </span>
+                                </td>
+                            }
+                            <td><span class="badge activity-log-category">@log.Category</span></td>
+                            <td>
+                                <span class="d-block">@log.Description</span>
+                                @if (!string.IsNullOrEmpty(log.Target) || !string.IsNullOrEmpty(log.EntityId))
+                                {
+                                    <span class="small text-muted">
+                                        @log.Target
+                                        @if (!string.IsNullOrEmpty(log.EntityId))
+                                        {
+                                            <span>#@log.EntityId</span>
+                                        }
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (log.IsSuccess)
+                                {
+                                    <span class="badge text-bg-success">Başarılı</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-danger">Başarısız</span>
+                                }
+                            </td>
+                            @if (Model.IsSystemAdmin)
+                            {
+                                <td class="small text-muted text-nowrap">@log.IpAddress</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<partial name="_Pager" model="Model.Logs" />

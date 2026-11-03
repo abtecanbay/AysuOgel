@@ -18,12 +18,14 @@ public class AccountController : Controller
     private readonly IConfiguration _config;
     private readonly IAdminUserService _admins;
     private readonly IAdminPageService _pages;
+    private readonly IActivityLogService _logs;
 
-    public AccountController(IConfiguration config, IAdminUserService admins, IAdminPageService pages)
+    public AccountController(IConfiguration config, IAdminUserService admins, IAdminPageService pages, IActivityLogService logs)
     {
         _config = config;
         _admins = admins;
         _pages = pages;
+        _logs = logs;
     }
 
     /// <summary>Girişten sonraki açılış: yöneticinin erişebildiği ilk sayfaya yönlendirir.</summary>
@@ -88,11 +90,14 @@ public class AccountController : Controller
         // Rol ayrımı ileride yapılacak; şimdilik tüm yöneticiler "Admin" rolündedir.
         claims.Add(new Claim(ClaimTypes.Role, "Admin"));
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(identity),
+            principal,
             new AuthenticationProperties { IsPersistent = model.RememberMe });
+
+        await LogSessionAsync(principal, nameof(Login), "Panele giriş yaptı.");
 
         if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             return Redirect(model.ReturnUrl);
@@ -103,8 +108,21 @@ public class AccountController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
+        if (User.Identity?.IsAuthenticated == true)
+            await LogSessionAsync(User, nameof(Logout), "Panelden çıkış yaptı.");
+
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction(nameof(Login));
+    }
+
+    private Task LogSessionAsync(ClaimsPrincipal principal, string action, string description)
+    {
+        var entry = ActivityLogEntry.For(principal, HttpContext);
+        entry.Category = "Oturum";
+        entry.Controller = "Account";
+        entry.Action = action;
+        entry.Description = description;
+        return _logs.WriteAsync(entry);
     }
 
     private static bool FixedEquals(string a, string b) =>
