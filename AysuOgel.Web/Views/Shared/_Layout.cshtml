@@ -1,4 +1,6 @@
-﻿@{
+﻿@inject AysuOgel.Business.Abstract.ISiteSettingsService SiteSettingsService
+@{
+    var site = await SiteSettingsService.GetCachedAsync();
     var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
     string Active(string c) =>
         string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
@@ -8,7 +10,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Aysu Öğel Sağlıklı Yaşam</title>
+    <title>@ViewData["Title"] - @site.SiteTitle</title>
+    @if (!string.IsNullOrEmpty(site.FaviconUrl))
+    {
+        <link rel="icon" href="@Url.ImageUrl(site.FaviconUrl)" />
+    }
     <script>document.documentElement.classList.add('js');</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,13 +27,20 @@
     <header class="site-nav">
         <nav class="navbar navbar-expand-md container">
             <a class="navbar-brand brand" asp-area="" asp-controller="Home" asp-action="Index">
-                <span class="brand-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z" />
-                        <path d="M4 21c3-6 6-9 10-11" />
-                    </svg>
-                </span>
-                <span>AysuOgel</span>
+                @if (!string.IsNullOrEmpty(site.LogoUrl))
+                {
+                    <img src="@Url.ImageUrl(site.LogoUrl)" alt="" class="brand-logo" height="38" style="height:38px;width:auto;max-width:160px;object-fit:contain" />
+                }
+                else
+                {
+                    <span class="brand-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z" />
+                            <path d="M4 21c3-6 6-9 10-11" />
+                        </svg>
+                    </span>
+                }
+                <span>@site.BrandName</span>
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
                     aria-controls="mainNav" aria-expanded="false" aria-label="Menüyü aç/kapat">
@@ -56,12 +69,12 @@
     <footer class="site-footer mt-5">
         <div class="container d-flex flex-column flex-md-row justify-content-between gap-3 py-4">
             <div>
-                <strong class="brand-text">AysuOgel</strong>
+                <strong class="brand-text">@site.BrandName</strong>
                 <div class="small">Çankaya, Ankara</div>
             </div>
             <div class="small d-flex flex-wrap gap-3 align-items-center">
                 <a asp-area="" asp-controller="Home" asp-action="Privacy">KVKK Aydınlatma Metni</a>
-                <span>&copy; @DateTime.Now.Year AysuOgel</span>
+                <span>&copy; @DateTime.Now.Year @site.BrandName</span>
             </div>
         </div>
     </footer>

@@ -2,6 +2,7 @@ using AysuOgel.Business.Abstract;
 using AysuOgel.Business.Concrete;
 using AysuOgel.DataAccess.Contexts;
 using AysuOgel.Web.Helpers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,10 @@ builder.Services.AddScoped<IMessageReplyService, MessageReplyService>();
 builder.Services.AddScoped<ISuccessStoryService, SuccessStoryService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<ISiteSettingsService, SiteSettingsService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IAdminPageService, AdminPageService>();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddRateLimiter(o =>
 {
@@ -75,14 +80,15 @@ builder.Services.AddRateLimiter(o =>
             }));
 });
 
-builder.Services.AddControllersWithViews();
+// Panelden eklenen yöneticiler yalnızca kendilerine atanan sayfalara erişebilir.
+builder.Services.AddControllersWithViews(o => o.Filters.Add<AdminPageAccessFilter>());
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
     {
         o.LoginPath = "/Admin/Account/Login";
-        o.AccessDeniedPath = "/Admin/Account/Login";
+        o.AccessDeniedPath = "/Admin/Account/AccessDenied";
         o.Cookie.Name = "__Host-AysuOgel.Admin";
         o.Cookie.HttpOnly = true;
         o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -90,6 +96,21 @@ builder.Services
         o.Cookie.Path = "/";
         o.ExpireTimeSpan = TimeSpan.FromHours(8);
         o.SlidingExpiration = true;
+
+        // Panelden eklenen bir yönetici silinir veya pasife alınırsa açık oturumu da hemen sonlanır.
+        o.Events.OnValidatePrincipal = async ctx =>
+        {
+            var adminId = ctx.Principal?.GetAdminUserId();
+            if (adminId is null) return;
+
+            var admins = ctx.HttpContext.RequestServices.GetRequiredService<IAdminUserService>();
+            var admin = await admins.GetByIdAsync(adminId.Value);
+            if (admin is null || !admin.IsActive)
+            {
+                ctx.RejectPrincipal();
+                await ctx.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        };
     })
     // Üyelerin seans sorgulama oturumu; yönetici oturumundan tamamen ayrıdır.
     .AddCookie(MemberAuth.Scheme, o =>

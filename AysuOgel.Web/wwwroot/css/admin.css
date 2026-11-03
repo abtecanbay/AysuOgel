@@ -60,3 +60,19 @@
 .availability-weekdays-toggle { padding: 1rem 1rem 1rem 2.7rem; border: 1px solid var(--admin-border); border-radius: 12px; background: #fafcfb; }
 .availability-weekdays-toggle .form-check-input { margin-top: .28rem; }
 .availability-explainer { color: #596b60; line-height: 1.65; }
+
+/* Yönetici formu: sayfa yetkileri kartı */
+.admin-form-split { max-width: 1400px; }
+.admin-perm-card { position: sticky; top: 1rem; }
+.admin-perm-counter { background: #edf3ee; color: var(--admin-green); font-weight: 700; font-size: .78rem; padding: .4em .75em; }
+.admin-perm-group + .admin-perm-group { margin-top: 1.1rem; }
+.admin-perm-group-title { margin-bottom: .5rem; color: #688174; font-size: .7rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.admin-perm-item { display: flex; align-items: flex-start; gap: .75rem; padding: .7rem .9rem; border: 1px solid var(--admin-border); border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.admin-perm-item:hover { border-color: #b8cabe; background: #f7faf7; }
+.admin-perm-item:has(input:checked) { border-color: #79a38a; background: #edf3ee; }
+.admin-perm-item:has(input:focus-visible) { box-shadow: 0 0 0 .2rem #315b491b; }
+.admin-perm-item .form-check-input { flex-shrink: 0; margin-top: .2rem; }
+.admin-perm-item .form-check-input:checked { background-color: var(--admin-green); border-color: var(--admin-green); }
+.admin-perm-title { display: block; font-weight: 600; color: var(--admin-ink); }
+.admin-perm-desc { display: block; margin-top: .1rem; color: var(--admin-muted); font-size: .8rem; line-height: 1.35; }
+@media (max-width: 991.98px) { .admin-perm-card { position: static; } }

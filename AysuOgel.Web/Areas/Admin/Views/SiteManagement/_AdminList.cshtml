@@ -1,0 +1,101 @@
+@model SiteManagementViewModel
+@{
+    var currentAdminId = User.GetAdminUserId();
+    var tr = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+    string Fmt(DateTime? utc) => utc is null ? "—" : utc.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm", tr);
+}
+<div class="card admin-table-card">
+    <div class="card-header bg-white border-0 px-4 pt-4 d-flex justify-content-between align-items-start gap-2 flex-wrap">
+        <div>
+            <h2 class="h5 mb-1">Yönetici listesi</h2>
+            <p class="text-muted small mb-0">Her yönetici yalnızca kendisine atanan sayfaları görür. Pasif hesaplar giriş yapamaz.</p>
+        </div>
+        <a asp-action="CreateAdmin" class="btn btn-sm btn-primary">+ Yönetici ekle</a>
+    </div>
+    <div class="table-responsive px-3 pb-3">
+        <table class="table align-middle">
+            <thead><tr><th>Yönetici</th><th>Kullanıcı adı</th><th>Erişim</th><th>Son giriş</th><th>Durum</th><th class="text-end">İşlemler</th></tr></thead>
+            <tbody>
+            @if (!string.IsNullOrEmpty(Model.SystemAdminUsername))
+            {
+                <tr>
+                    <td>
+                        <div class="fw-semibold">Ana yönetici</div>
+                        <div class="small text-muted">Sunucu yapılandırmasında tanımlı</div>
+                    </td>
+                    <td><code>@Model.SystemAdminUsername</code></td>
+                    <td><span class="badge rounded-pill text-bg-light border">Tüm sayfalar</span></td>
+                    <td class="text-muted">—</td>
+                    <td><span class="badge rounded-pill text-bg-dark">Sistem</span></td>
+                    <td class="text-end small text-muted">Panelden düzenlenemez</td>
+                </tr>
+            }
+            @foreach (var admin in Model.Admins)
+            {
+                var isSelf = currentAdminId == admin.Id;
+                <tr>
+                    <td>
+                        <div class="fw-semibold">
+                            @admin.FullName
+                            @if (isSelf)
+                            {
+                                <span class="badge text-bg-light border ms-1">Siz</span>
+                            }
+                        </div>
+                        <div class="small text-muted">@(admin.Email ?? "E-posta yok")</div>
+                    </td>
+                    <td><code>@admin.Username</code></td>
+                    <td style="max-width:320px">
+                        @{
+                            var userPages = admin.Pages.Select(p => p.AdminPage).Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                        }
+                        @if (userPages.Count == 0)
+                        {
+                            <span class="small text-danger">Sayfa atanmamış</span>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var adminPage in userPages)
+                                {
+                                    <span class="badge rounded-pill text-bg-light border fw-normal">@adminPage.Title</span>
+                                }
+                            </div>
+                        }
+                    </td>
+                    <td class="text-muted small">@Fmt(admin.LastLoginAt)</td>
+                    <td>
+                        @if (admin.IsActive)
+                        {
+                            <span class="badge rounded-pill text-bg-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill text-bg-secondary">Pasif</span>
+                        }
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a asp-action="EditAdmin" asp-route-id="@admin.Id" class="btn btn-sm btn-outline-secondary">Düzenle</a>
+                        @if (!isSelf)
+                        {
+                            <form asp-action="DeleteAdmin" asp-route-id="@admin.Id" method="post" class="d-inline"
+                                  data-confirm="@admin.FullName adlı yönetici silinsin mi?"
+                                  onsubmit="return confirm(this.dataset.confirm);">
+                                <button class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (Model.Admins.Count == 0)
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        Panelden eklenmiş yönetici yok. <a asp-action="CreateAdmin">İlk yöneticiyi ekleyin</a>.
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

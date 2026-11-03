@@ -179,6 +179,203 @@ namespace AysuOgel.DataAccess.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AdminPage", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Controller")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RelatedControllers")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Controller")
+                        .IsUnique();
+
+                    b.ToTable("AdminPages", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Controller = "Services",
+                            Description = "Hizmet kartlarını ekleme, düzenleme ve sıralama.",
+                            GroupName = "İçerik",
+                            IsActive = true,
+                            SortOrder = 1,
+                            Title = "Hizmetler"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Controller = "Campaigns",
+                            Description = "Kampanyalar, paketler ve kampanya sayfası ayarları.",
+                            GroupName = "İçerik",
+                            IsActive = true,
+                            RelatedControllers = "Packages",
+                            SortOrder = 2,
+                            Title = "Kampanyalar"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Controller = "SuccessStories",
+                            Description = "Başarı hikâyeleri ve önce/sonra görselleri.",
+                            GroupName = "İçerik",
+                            IsActive = true,
+                            SortOrder = 3,
+                            Title = "Başarılarımız"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Controller = "AboutPage",
+                            Description = "Hakkımızda sayfasının blokları ve ayarları.",
+                            GroupName = "İçerik",
+                            IsActive = true,
+                            SortOrder = 4,
+                            Title = "Hakkımızda"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Controller = "Members",
+                            Description = "Üye kayıtları, paketleri ve seansları.",
+                            GroupName = "Operasyon",
+                            IsActive = true,
+                            SortOrder = 5,
+                            Title = "Üyeler"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Controller = "Messages",
+                            Description = "İletişim formundan gelen mesajlar ve yanıtlar.",
+                            GroupName = "Operasyon",
+                            IsActive = true,
+                            SortOrder = 6,
+                            Title = "Mesajlar"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Controller = "Appointments",
+                            Description = "Gelen randevu talepleri.",
+                            GroupName = "Operasyon",
+                            IsActive = true,
+                            SortOrder = 7,
+                            Title = "Randevular"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Controller = "Availability",
+                            Description = "Randevu alınabilecek müsaitlik saatleri.",
+                            GroupName = "Operasyon",
+                            IsActive = true,
+                            SortOrder = 8,
+                            Title = "Müsaitlik"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Controller = "SiteManagement",
+                            Description = "Site ayarları ve yönetici hesapları (yetki verebilir).",
+                            GroupName = "Sistem",
+                            IsActive = true,
+                            SortOrder = 9,
+                            Title = "Sayfa Yönetimi"
+                        });
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AdminUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("AdminUsers", (string)null);
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AdminUserPage", b =>
+                {
+                    b.Property<int>("AdminUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AdminPageId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AdminUserId", "AdminPageId");
+
+                    b.HasIndex("AdminPageId");
+
+                    b.ToTable("AdminUserPages", (string)null);
+                });
+
             modelBuilder.Entity("AysuOgel.Entities.Entities.Appointment", b =>
                 {
                     b.Property<int>("Id")
@@ -657,6 +854,45 @@ namespace AysuOgel.DataAccess.Migrations
                     b.ToTable("Services", (string)null);
                 });
 
+            modelBuilder.Entity("AysuOgel.Entities.Entities.SiteSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BrandName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("FaviconUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("SiteTitle")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteSettings", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BrandName = "AysuOgel",
+                            SiteTitle = "Aysu Öğel Sağlıklı Yaşam"
+                        });
+                });
+
             modelBuilder.Entity("AysuOgel.Entities.Entities.SuccessStory", b =>
                 {
                     b.Property<int>("Id")
@@ -706,6 +942,25 @@ namespace AysuOgel.DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("AboutBlock");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AdminUserPage", b =>
+                {
+                    b.HasOne("AysuOgel.Entities.Entities.AdminPage", "AdminPage")
+                        .WithMany("AdminUsers")
+                        .HasForeignKey("AdminPageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AysuOgel.Entities.Entities.AdminUser", "AdminUser")
+                        .WithMany("Pages")
+                        .HasForeignKey("AdminUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdminPage");
+
+                    b.Navigation("AdminUser");
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.Appointment", b =>
@@ -773,6 +1028,16 @@ namespace AysuOgel.DataAccess.Migrations
             modelBuilder.Entity("AysuOgel.Entities.Entities.AboutBlock", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AdminPage", b =>
+                {
+                    b.Navigation("AdminUsers");
+                });
+
+            modelBuilder.Entity("AysuOgel.Entities.Entities.AdminUser", b =>
+                {
+                    b.Navigation("Pages");
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.Member", b =>

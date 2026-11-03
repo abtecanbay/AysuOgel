@@ -25,10 +25,86 @@ public class AppDbContext : DbContext
     public DbSet<Member> Members => Set<Member>();
     public DbSet<MemberPackage> MemberPackages => Set<MemberPackage>();
     public DbSet<MemberSession> MemberSessions => Set<MemberSession>();
+    public DbSet<SiteSettings> SiteSettings => Set<SiteSettings>();
+    public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<AdminPage> AdminPages => Set<AdminPage>();
+    public DbSet<AdminUserPage> AdminUserPages => Set<AdminUserPage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<SiteSettings>(entity =>
+        {
+            entity.ToTable("SiteSettings");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
+            entity.Property(x => x.SiteTitle).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.BrandName).HasMaxLength(60).IsRequired();
+            entity.Property(x => x.LogoUrl).HasMaxLength(1000);
+            entity.Property(x => x.FaviconUrl).HasMaxLength(1000);
+
+            entity.HasData(new SiteSettings
+            {
+                Id = 1,
+                SiteTitle = "Aysu Öğel Sağlıklı Yaşam",
+                BrandName = "AysuOgel"
+            });
+        });
+
+        modelBuilder.Entity<AdminUser>(entity =>
+        {
+            entity.ToTable("AdminUsers");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Username).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.FullName).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(150);
+            entity.Property(x => x.PasswordHash).HasMaxLength(200).IsRequired();
+
+            entity.HasIndex(x => x.Username).IsUnique();
+        });
+
+        modelBuilder.Entity<AdminPage>(entity =>
+        {
+            entity.ToTable("AdminPages");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Id).ValueGeneratedNever();
+            entity.Property(x => x.Title).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(200);
+            entity.Property(x => x.GroupName).HasMaxLength(60).IsRequired();
+            entity.Property(x => x.Controller).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RelatedControllers).HasMaxLength(300);
+
+            entity.HasIndex(x => x.Controller).IsUnique();
+
+            entity.HasData(
+                new AdminPage { Id = 1, SortOrder = 1, GroupName = "İçerik", Title = "Hizmetler", Controller = "Services", Description = "Hizmet kartlarını ekleme, düzenleme ve sıralama." },
+                new AdminPage { Id = 2, SortOrder = 2, GroupName = "İçerik", Title = "Kampanyalar", Controller = "Campaigns", RelatedControllers = "Packages", Description = "Kampanyalar, paketler ve kampanya sayfası ayarları." },
+                new AdminPage { Id = 3, SortOrder = 3, GroupName = "İçerik", Title = "Başarılarımız", Controller = "SuccessStories", Description = "Başarı hikâyeleri ve önce/sonra görselleri." },
+                new AdminPage { Id = 4, SortOrder = 4, GroupName = "İçerik", Title = "Hakkımızda", Controller = "AboutPage", Description = "Hakkımızda sayfasının blokları ve ayarları." },
+                new AdminPage { Id = 5, SortOrder = 5, GroupName = "Operasyon", Title = "Üyeler", Controller = "Members", Description = "Üye kayıtları, paketleri ve seansları." },
+                new AdminPage { Id = 6, SortOrder = 6, GroupName = "Operasyon", Title = "Mesajlar", Controller = "Messages", Description = "İletişim formundan gelen mesajlar ve yanıtlar." },
+                new AdminPage { Id = 7, SortOrder = 7, GroupName = "Operasyon", Title = "Randevular", Controller = "Appointments", Description = "Gelen randevu talepleri." },
+                new AdminPage { Id = 8, SortOrder = 8, GroupName = "Operasyon", Title = "Müsaitlik", Controller = "Availability", Description = "Randevu alınabilecek müsaitlik saatleri." },
+                new AdminPage { Id = 9, SortOrder = 9, GroupName = "Sistem", Title = "Sayfa Yönetimi", Controller = "SiteManagement", Description = "Site ayarları ve yönetici hesapları (yetki verebilir)." });
+        });
+
+        modelBuilder.Entity<AdminUserPage>(entity =>
+        {
+            entity.ToTable("AdminUserPages");
+            entity.HasKey(x => new { x.AdminUserId, x.AdminPageId });
+
+            entity.HasOne(x => x.AdminUser)
+                .WithMany(x => x.Pages)
+                .HasForeignKey(x => x.AdminUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.AdminPage)
+                .WithMany(x => x.AdminUsers)
+                .HasForeignKey(x => x.AdminPageId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         modelBuilder.Entity<Package>(entity =>
         {

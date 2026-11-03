@@ -6,13 +6,15 @@ public static class ImageUploadHelper
 {
     public const long MaxImageBytes = 5 * 1024 * 1024;
 
-    public static async Task<string?> SaveImageAsync(IFormFile file, string webRootPath)
+    /// <param name="allowIco">Favicon yüklemeleri için .ico dosyalarına da izin verir.</param>
+    public static async Task<string?> SaveImageAsync(IFormFile file, string webRootPath, bool allowIco = false)
     {
         if (file.Length <= 0 || file.Length > MaxImageBytes)
             return null;
 
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (extension is not (".jpg" or ".jpeg" or ".png" or ".webp"))
+        var allowed = extension is ".jpg" or ".jpeg" or ".png" or ".webp" || (allowIco && extension == ".ico");
+        if (!allowed)
             return null;
 
         await using var stream = file.OpenReadStream();
@@ -38,6 +40,9 @@ public static class ImageUploadHelper
 
     private static bool HasValidImageSignature(byte[] bytes, int length, string extension)
     {
+        if (extension == ".ico")
+            return length >= 4 && bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x01 && bytes[3] == 0x00;
+
         if (extension is ".jpg" or ".jpeg")
             return length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
 

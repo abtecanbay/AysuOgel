@@ -1,0 +1,160 @@
+@model AdminUserFormViewModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Yeni Yönetici" : "Yöneticiyi Düzenle";
+    var isSelf = !Model.IsNew && User.GetAdminUserId() == Model.Id;
+    var pageGroups = Model.AvailablePages.GroupBy(p => p.GroupName).ToList();
+}
+
+<div class="admin-page-heading">
+    <div>
+        <p class="admin-eyebrow mb-1">SAYFA YÖNETİMİ · YÖNETİCİLER</p>
+        <h1 class="h3 mb-1">@ViewData["Title"]</h1>
+        <p class="text-muted mb-0">@(Model.IsNew ? "Yönetim paneline giriş yapabilecek yeni bir hesap oluşturun." : $"{Model.FullName} hesabının bilgilerini ve erişebileceği sayfaları güncelleyin.")</p>
+    </div>
+</div>
+
+<form asp-action="@(Model.IsNew ? "CreateAdmin" : "EditAdmin")" asp-route-id="@(Model.IsNew ? null : Model.Id)" method="post" autocomplete="off">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row g-4 align-items-start admin-form-split">
+        @* ------------------------------------------------ Sol: hesap bilgileri *@
+        <div class="col-lg-7">
+            <div class="card admin-form-card"><div class="card-body p-4">
+                <h2 class="h5 mb-1">Hesap bilgileri</h2>
+                <p class="text-muted small mb-4">Giriş bilgileri ve hesap durumu.</p>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" maxlength="120" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" maxlength="50" autocomplete="off" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                        <div class="form-text">Girişte kullanılır; büyük/küçük harf duyarsızdır.</div>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" maxlength="150" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="form-text">İsteğe bağlı.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="form-text">@(Model.IsNew ? "En az 8 karakter." : "Değiştirmek istemiyorsanız boş bırakın.")</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" role="switch" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                        </div>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                        <div class="form-text">Pasif hesaplar giriş yapamaz; açık oturumları da sonlandırılır.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button class="btn btn-primary px-4">@(Model.IsNew ? "Yöneticiyi Ekle" : "Kaydet")</button>
+                    <a asp-action="Index" asp-route-section="admins" class="btn btn-outline-secondary">İptal</a>
+                </div>
+            </div></div>
+        </div>
+
+        @* ------------------------------------------------ Sağ: sayfa yetkileri *@
+        <div class="col-lg-5">
+            <div class="card admin-perm-card" data-perm-card>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                        <h2 class="h5 mb-0">Erişebileceği sayfalar</h2>
+                        <span class="badge rounded-pill admin-perm-counter" data-perm-counter>
+                            @Model.PageIds.Count / @Model.AvailablePages.Count
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-3">Yönetici menüde yalnızca seçili sayfaları görür ve yalnızca bunlara girebilir.</p>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-perm-all>Tümünü seç</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-perm-none>Temizle</button>
+                    </div>
+
+                    <span asp-validation-for="PageIds" class="text-danger d-block mb-2"></span>
+
+                    @foreach (var group in pageGroups)
+                    {
+                        <div class="admin-perm-group">
+                            <div class="admin-perm-group-title">@group.Key</div>
+                            <div class="d-grid gap-2">
+                                @foreach (var adminPage in group)
+                                {
+                                    var inputId = $"page-{adminPage.Id}";
+                                    var isChecked = Model.PageIds.Contains(adminPage.Id);
+                                    var isLocked = isSelf && adminPage.Controller == "SiteManagement";
+                                    <label class="admin-perm-item" for="@inputId">
+                                        <input class="form-check-input" type="checkbox" name="PageIds" value="@adminPage.Id" id="@inputId"
+                                               checked="@isChecked" data-perm-input
+                                               data-perm-locked="@(isLocked ? "true" : null)" />
+                                        <span>
+                                            <span class="admin-perm-title">
+                                                @adminPage.Title
+                                                @if (adminPage.Controller == "SiteManagement")
+                                                {
+                                                    <span class="badge text-bg-warning ms-1">Tam yetki</span>
+                                                }
+                                            </span>
+                                            @if (!string.IsNullOrEmpty(adminPage.Description))
+                                            {
+                                                <span class="admin-perm-desc">@adminPage.Description</span>
+                                            }
+                                            @if (isLocked)
+                                            {
+                                                <span class="admin-perm-desc text-danger">Kendi hesabınızdan kaldıramazsınız.</span>
+                                            }
+                                        </span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.AvailablePages.Count == 0)
+                    {
+                        <p class="text-muted small mb-0">Tanımlı yönetim sayfası bulunamadı.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const card = document.querySelector('[data-perm-card]');
+            if (!card) return;
+            const inputs = [...card.querySelectorAll('[data-perm-input]')];
+            const counter = card.querySelector('[data-perm-counter]');
+            const update = () => {
+                counter.textContent = `${inputs.filter(i => i.checked).length} / ${inputs.length}`;
+            };
+            const setAll = (value) => {
+                inputs.forEach(i => { if (!(i.hasAttribute('data-perm-locked') && !value)) i.checked = value; });
+                update();
+            };
+            inputs.forEach(i => i.addEventListener('change', update));
+            card.querySelector('[data-perm-all]').addEventListener('click', () => setAll(true));
+            card.querySelector('[data-perm-none]').addEventListener('click', () => setAll(false));
+            update();
+        })();
+    </script>
+}

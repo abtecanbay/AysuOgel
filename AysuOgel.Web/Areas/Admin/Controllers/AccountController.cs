@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using AysuOgel.Business.Abstract;
+using AysuOgel.Web.Helpers;
 using AysuOgel.Web.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -14,13 +16,35 @@ namespace AysuOgel.Web.Areas.Admin.Controllers;
 public class AccountController : Controller
 {
     private readonly IConfiguration _config;
-    public AccountController(IConfiguration config) => _config = config;
+    private readonly IAdminUserService _admins;
+    private readonly IAdminPageService _pages;
+
+    public AccountController(IConfiguration config, IAdminUserService admins, IAdminPageService pages)
+    {
+        _config = config;
+        _admins = admins;
+        _pages = pages;
+    }
+
+    /// <summary>Girişten sonraki açılış: yöneticinin erişebildiği ilk sayfaya yönlendirir.</summary>
+    [HttpGet, Authorize]
+    public async Task<IActionResult> Start()
+    {
+        var first = (await _pages.GetAccessibleAsync(User.GetAdminUserId())).FirstOrDefault();
+        return first is null
+            ? RedirectToAction(nameof(AccessDenied))
+            : RedirectToAction("Index", first.Controller, new { area = "Admin" });
+    }
+
+    [HttpGet, Authorize]
+    public async Task<IActionResult> AccessDenied() =>
+        View(await _pages.GetAccessibleAsync(User.GetAdminUserId()));
 
     [HttpGet, AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Index", "Services", new { area = "Admin" });
+            return RedirectToAction(nameof(Start));
 
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
@@ -30,25 +54,40 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
+        List<Claim>? claims = null;
+
+        // 1) Ana (sistem) yönetici: appsettings / user-secrets içindeki Admin:Username + Admin:Password.
         var user = _config["Admin:Username"];
         var pass = _config["Admin:Password"];
-
-        if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(pass))
+        if (!string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(pass) &&
+            FixedEquals(model.Username, user) & FixedEquals(model.Password, pass))
         {
-            ModelState.AddModelError(string.Empty, "Yönetici hesabı yapılandırılmamış.");
-            return View(model);
+            claims = [new Claim(ClaimTypes.Name, user), new Claim(ClaimTypes.GivenName, user)];
+        }
+        else
+        {
+            // 2) Sayfa Yönetimi'nden eklenen yöneticiler.
+            var admin = await _admins.ValidateCredentialsAsync(model.Username, model.Password);
+            if (admin is not null)
+            {
+                claims =
+                [
+                    new Claim(ClaimTypes.Name, admin.Username),
+                    new Claim(ClaimTypes.GivenName, admin.FullName),
+                    new Claim(AdminClaims.AdminUserId, admin.Id.ToString())
+                ];
+            }
         }
 
-        var ok = FixedEquals(model.Username, user) & FixedEquals(model.Password, pass);
-        if (!ok)
+        if (claims is null)
         {
             ModelState.AddModelError(string.Empty, "Kullanıcı adı veya şifre hatalı.");
             return View(model);
         }
 
-        var identity = new ClaimsIdentity(
-            new[] { new Claim(ClaimTypes.Name, user), new Claim(ClaimTypes.Role, "Admin") },
-            CookieAuthenticationDefaults.AuthenticationScheme);
+        // Rol ayrımı ileride yapılacak; şimdilik tüm yöneticiler "Admin" rolündedir.
+        claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
@@ -58,7 +97,7 @@ public class AccountController : Controller
         if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             return Redirect(model.ReturnUrl);
 
-        return RedirectToAction("Index", "Services", new { area = "Admin" });
+        return RedirectToAction(nameof(Start));
     }
 
     [HttpPost, ValidateAntiForgeryToken]
