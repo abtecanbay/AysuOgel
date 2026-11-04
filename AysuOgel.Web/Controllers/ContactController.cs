@@ -44,8 +44,8 @@ public class ContactController : Controller
         {
             model.FirstName = member.FirstName;
             model.LastName = member.LastName;
-            model.Email = member.Email;
-            model.Phone = member.Phone;
+            model.Email = member.Email ?? string.Empty;
+            model.Phone = member.Phone ?? string.Empty;
         }
         return View(model);
     }

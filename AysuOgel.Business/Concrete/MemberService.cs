@@ -11,7 +11,32 @@ public class MemberService : IMemberService
     private readonly AppDbContext _db;
     public MemberService(AppDbContext db) => _db = db;
 
-    public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+    public static string? NormalizeEmail(string? email) =>
+        string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
+
+    /// <summary>Yalnızca rakamlar saklanır; boşsa null.</summary>
+    public static string? NormalizePhone(string? phone)
+    {
+        var digits = phone is null ? "" : new string(phone.Where(char.IsDigit).ToArray());
+        return digits.Length == 0 ? null : digits;
+    }
+
+    /// <summary>
+    /// Aynı numaranın farklı yazımları (05321234567, 905321234567, 5321234567) eşleşsin diye
+    /// 10 haneden uzun numaralarda son 10 hane, kısalarda numaranın tamamı karşılaştırılır.
+    /// </summary>
+    private static string PhoneKey(string digits) => digits.Length > 10 ? digits[^10..] : digits;
+
+    /// <summary>Normalize edilmiş numarayla eşleşen üyeler (en fazla birkaç kayıt).</summary>
+    private async Task<List<Member>> FindByPhoneAsync(string digits, int? exceptMemberId = null)
+    {
+        var key = PhoneKey(digits);
+        var list = await _db.Members.AsNoTracking()
+            .Where(x => x.Phone != null && x.Phone.EndsWith(key) && x.Id != exceptMemberId)
+            .Take(10)
+            .ToListAsync();
+        return list.Where(x => PhoneKey(x.Phone!) == key).ToList();
+    }
 
     public Task<PagedResult<MemberListItem>> GetAllAsync(MemberFilter? filter = null)
     {
@@ -24,13 +49,11 @@ public class MemberService : IMemberService
 
         var phone = FilterHelper.PhoneDigits(filter.Phone);
         if (phone is not null)
-            query = query.Where(x => x.Phone
-                .Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "")
-                .Contains(phone));
+            query = query.Where(x => x.Phone != null && x.Phone.Contains(phone));
 
         var email = FilterHelper.Clean(filter.Email)?.ToLowerInvariant();
         if (email is not null)
-            query = query.Where(x => x.Email.Contains(email));
+            query = query.Where(x => x.Email != null && x.Email.Contains(email));
 
         if (filter.PackageId is { } packageId)
             query = query.Where(x => x.Packages.Any(p => p.PackageId == packageId));
@@ -84,10 +107,17 @@ public class MemberService : IMemberService
             .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id);
 
-    public Task<bool> EmailExistsAsync(string email, int? exceptMemberId = null)
+    public async Task<bool> EmailExistsAsync(string? email, int? exceptMemberId = null)
     {
         var normalized = NormalizeEmail(email);
-        return _db.Members.AnyAsync(x => x.Email == normalized && x.Id != exceptMemberId);
+        return normalized is not null
+            && await _db.Members.AnyAsync(x => x.Email == normalized && x.Id != exceptMemberId);
+    }
+
+    public async Task<bool> PhoneExistsAsync(string? phone, int? exceptMemberId = null)
+    {
+        var digits = NormalizePhone(phone);
+        return digits is not null && (await FindByPhoneAsync(digits, exceptMemberId)).Count > 0;
     }
 
     public async Task<Member> CreateAsync(Member member, string password, int packageId, DateOnly startDate, DateOnly? endDate)
@@ -96,6 +126,9 @@ public class MemberService : IMemberService
             ?? throw new InvalidOperationException("Paket bulunamadı.");
 
         member.Email = NormalizeEmail(member.Email);
+        member.Phone = NormalizePhone(member.Phone);
+        if (member.Email is null && member.Phone is null)
+            throw new InvalidOperationException("E-posta veya telefon girilmelidir.");
         member.PasswordHash = PasswordHasher.Hash(password);
         member.CreatedAt = DateTime.UtcNow;
         member.Packages.Add(NewMemberPackage(package, startDate, endDate));
@@ -112,8 +145,12 @@ public class MemberService : IMemberService
 
         entity.FirstName = member.FirstName;
         entity.LastName = member.LastName;
-        entity.Email = NormalizeEmail(member.Email);
-        entity.Phone = member.Phone;
+        var email = NormalizeEmail(member.Email);
+        var phone = NormalizePhone(member.Phone);
+        if (email is null && phone is null)
+            throw new InvalidOperationException("E-posta veya telefon girilmelidir.");
+        entity.Email = email;
+        entity.Phone = phone;
         if (!string.IsNullOrEmpty(newPassword))
             entity.PasswordHash = PasswordHasher.Hash(newPassword);
         entity.UpdatedAt = DateTime.UtcNow;
@@ -132,12 +169,32 @@ public class MemberService : IMemberService
     // Kayıtlı olmayan e-postada da aynı süre harcansın; yanıt süresinden üye varlığı anlaşılmasın.
     private static readonly string DummyHash = PasswordHasher.Hash(Guid.NewGuid().ToString());
 
-    public async Task<Member?> VerifyCredentialsAsync(string email, string password)
+    public async Task<Member?> VerifyCredentialsAsync(string emailOrPhone, string password)
     {
-        var normalized = NormalizeEmail(email);
-        var member = await _db.Members.AsNoTracking().FirstOrDefaultAsync(x => x.Email == normalized);
-        var ok = PasswordHasher.Verify(password, member?.PasswordHash ?? DummyHash);
-        return member is not null && ok ? member : null;
+        var login = emailOrPhone.Trim();
+
+        List<Member> candidates;
+        if (login.Contains('@'))
+        {
+            var normalized = NormalizeEmail(login);
+            candidates = await _db.Members.AsNoTracking().Where(x => x.Email == normalized).ToListAsync();
+        }
+        else
+        {
+            // Üye numarayı boşluklu / +90'lı yazabilir; yalnızca rakamlar karşılaştırılır.
+            var digits = NormalizePhone(login);
+            candidates = digits is { Length: >= 9 } ? await FindByPhoneAsync(digits) : new();
+        }
+
+        // Kayıtlı olmayan girişte de en az bir hash doğrulaması yapılır (zamanlama eşitliği).
+        if (candidates.Count == 0)
+        {
+            PasswordHasher.Verify(password, DummyHash);
+            return null;
+        }
+
+        // Telefon artık benzersiz; eski kayıtlarda yazım farkıyla eşleşen birden fazla üye kalmışsa şifre eşleşen seçilir.
+        return candidates.FirstOrDefault(m => PasswordHasher.Verify(password, m.PasswordHash));
     }
 
     // ---- Satın alınan paketler ----
