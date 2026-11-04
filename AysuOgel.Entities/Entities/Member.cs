@@ -7,10 +7,13 @@ public class Member
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
 
-    /// <summary>Küçük harfe çevrilmiş halde saklanır; üye girişinde kullanıcı adı olarak kullanılacak.</summary>
-    public string Email { get; set; } = string.Empty;
+    // E-posta ve telefondan en az biri dolu olmalı; ikisi de üye girişinde kullanıcı adı olarak kullanılabilir.
 
-    public string Phone { get; set; } = string.Empty;
+    /// <summary>Küçük harfe çevrilmiş halde saklanır. Boşsa null.</summary>
+    public string? Email { get; set; }
+
+    /// <summary>Yalnızca rakamlardan oluşur (9–12 hane). Boşsa null.</summary>
+    public string? Phone { get; set; }
 
     /// <summary>PBKDF2 özeti; düz şifre hiçbir zaman saklanmaz.</summary>
     public string PasswordHash { get; set; } = string.Empty;

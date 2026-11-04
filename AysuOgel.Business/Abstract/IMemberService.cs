@@ -14,7 +14,10 @@ public interface IMemberService
     /// <summary>Paketler ve seanslarla birlikte.</summary>
     Task<Member?> GetByIdAsync(int id);
 
-    Task<bool> EmailExistsAsync(string email, int? exceptMemberId = null);
+    Task<bool> EmailExistsAsync(string? email, int? exceptMemberId = null);
+
+    /// <summary>Aynı numaranın farklı yazımlarını da (05.., 905.., 5..) tekrar sayar.</summary>
+    Task<bool> PhoneExistsAsync(string? phone, int? exceptMemberId = null);
 
     /// <summary>Üye kaydıyla birlikte ilk paketini de oluşturur.</summary>
     Task<Member> CreateAsync(Member member, string password, int packageId, DateOnly startDate, DateOnly? endDate);
@@ -24,8 +27,11 @@ public interface IMemberService
 
     Task DeleteAsync(int id);
 
-    /// <summary>E-posta ve şifre doğruysa üyeyi döner (üye seans sorgulama ekranı için).</summary>
-    Task<Member?> VerifyCredentialsAsync(string email, string password);
+    /// <summary>
+    /// E-posta ya da telefon numarası ile şifre doğruysa üyeyi döner (üye seans sorgulama ekranı için).
+    /// Girdide '@' varsa e-posta, yoksa telefon olarak değerlendirilir.
+    /// </summary>
+    Task<Member?> VerifyCredentialsAsync(string emailOrPhone, string password);
 
     Task<MemberPackage?> GetMemberPackageAsync(int memberPackageId);
     Task<string?> AddPackageAsync(int memberId, int packageId, DateOnly startDate, DateOnly? endDate);

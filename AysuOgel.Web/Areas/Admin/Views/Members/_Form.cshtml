@@ -21,12 +21,13 @@
             </div>
             <div class="col-sm-6">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" autocomplete="off" />
+                <input asp-for="Email" type="email" class="form-control" autocomplete="off" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="col-sm-6">
                 <label asp-for="Phone" class="form-label"></label>
-                <input asp-for="Phone" class="form-control" autocomplete="off" placeholder="05xx xxx xx xx" />
+                <input asp-for="Phone" type="tel" inputmode="numeric" pattern="[0-9]{9,12}" minlength="9" maxlength="12"
+                       class="form-control" autocomplete="off" placeholder="05xxxxxxxxx" data-digits-only />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
             <div class="col-sm-6">
@@ -41,10 +42,20 @@
             </div>
         </div>
         <div class="form-text mt-2">
+            E-posta ve telefondan en az biri girilmelidir.
             @(Model.IsNew
-                ? "Üye, seanslarını sorgulamak için bu e-posta ve şifreyle giriş yapacak."
+                ? "Üye, seanslarını sorgulamak için bunlardan biri ve şifresiyle giriş yapacak."
                 : "Şifreyi değiştirmek istemiyorsanız şifre alanlarını boş bırakın.")
         </div>
+        <script>
+            // Telefon alanına yalnızca rakam yazılabilsin (yapıştırılan metin de temizlenir), en fazla 12 hane.
+            document.querySelectorAll('[data-digits-only]').forEach(function (input) {
+                input.addEventListener('input', function () {
+                    const clean = input.value.replace(/\D/g, '').slice(0, 12);
+                    if (clean !== input.value) input.value = clean;
+                });
+            });
+        </script>
     </div>
 
     @if (Model.IsNew)

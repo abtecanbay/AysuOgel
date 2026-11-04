@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace AysuOgel.Web.Controllers;
 
-/// <summary>Üyelerin e-posta ve şifreyle giriş yapıp paket / seans bilgilerini gördüğü sayfa.</summary>
+/// <summary>Üyelerin e-posta ya da telefon ve şifreyle giriş yapıp paket / seans bilgilerini gördüğü sayfa.</summary>
 public class MemberSessionsController : Controller
 {
     private readonly IMemberService _members;
@@ -30,10 +30,10 @@ public class MemberSessionsController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        var member = await _members.VerifyCredentialsAsync(model.Email, model.Password);
+        var member = await _members.VerifyCredentialsAsync(model.Login, model.Password);
         if (member is null)
         {
-            ModelState.AddModelError(string.Empty, "E-posta veya şifre hatalı.");
+            ModelState.AddModelError(string.Empty, "E-posta / telefon veya şifre hatalı.");
             model.Password = string.Empty;
             return View(model);
         }

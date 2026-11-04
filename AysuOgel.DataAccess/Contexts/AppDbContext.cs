@@ -146,11 +146,14 @@ public class AppDbContext : DbContext
 
             entity.Property(x => x.FirstName).HasMaxLength(80).IsRequired();
             entity.Property(x => x.LastName).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.Email).HasMaxLength(150).IsRequired();
-            entity.Property(x => x.Phone).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.Email).HasMaxLength(150);
+            entity.Property(x => x.Phone).HasMaxLength(30);
             entity.Property(x => x.PasswordHash).HasMaxLength(200).IsRequired();
 
-            entity.HasIndex(x => x.Email).IsUnique();   // üye girişi e-posta ile yapılacak
+            // Üye girişi e-posta ya da telefonla yapılır; ikisi de doluysa benzersiz olmalı.
+            entity.HasIndex(x => x.Email).IsUnique().HasFilter("[Email] IS NOT NULL");
+            entity.HasIndex(x => x.Phone).IsUnique().HasFilter("[Phone] IS NOT NULL");
+            entity.ToTable(t => t.HasCheckConstraint("CK_Members_EmailOrPhone", "[Email] IS NOT NULL OR [Phone] IS NOT NULL"));
             entity.HasIndex(x => x.CreatedAt);
         });
 

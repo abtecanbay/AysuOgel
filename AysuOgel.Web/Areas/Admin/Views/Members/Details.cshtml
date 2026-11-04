@@ -3,7 +3,6 @@
 @{
     var m = Model.Member;
     ViewData["Title"] = $"{m.FirstName} {m.LastName}";
-    var phoneDigits = new string(m.Phone.Where(ch => char.IsDigit(ch) || ch == '+').ToArray());
 }
 
 <div class="admin-page-heading">
@@ -33,10 +32,14 @@
 <div class="card admin-form-card mb-4"><div class="card-body p-4">
     <dl class="row mb-0">
         <dt class="col-sm-3">E-posta</dt>
-        <dd class="col-sm-9"><a href="mailto:@m.Email">@m.Email</a></dd>
+        <dd class="col-sm-9">
+            @if (m.Email is not null) { <a href="mailto:@m.Email">@m.Email</a> } else { <span class="text-muted">—</span> }
+        </dd>
 
         <dt class="col-sm-3">Telefon</dt>
-        <dd class="col-sm-9"><a href="tel:@phoneDigits">@m.Phone</a></dd>
+        <dd class="col-sm-9">
+            @if (m.Phone is not null) { <a href="tel:@m.Phone">@m.Phone</a> } else { <span class="text-muted">—</span> }
+        </dd>
 
         <dt class="col-sm-3">Kayıt tarihi</dt>
         <dd class="col-sm-9 mb-0">@m.CreatedAt.ToTurkeyTime().ToString("dd.MM.yyyy HH:mm")</dd>

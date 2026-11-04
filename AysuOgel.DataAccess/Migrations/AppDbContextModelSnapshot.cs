@@ -667,7 +667,6 @@ namespace AysuOgel.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
@@ -687,7 +686,6 @@ namespace AysuOgel.DataAccess.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
@@ -699,9 +697,17 @@ namespace AysuOgel.DataAccess.Migrations
                     b.HasIndex("CreatedAt");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
-                    b.ToTable("Members", (string)null);
+                    b.HasIndex("Phone")
+                        .IsUnique()
+                        .HasFilter("[Phone] IS NOT NULL");
+
+                    b.ToTable("Members", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Members_EmailOrPhone", "[Email] IS NOT NULL OR [Phone] IS NOT NULL");
+                        });
                 });
 
             modelBuilder.Entity("AysuOgel.Entities.Entities.MemberPackage", b =>

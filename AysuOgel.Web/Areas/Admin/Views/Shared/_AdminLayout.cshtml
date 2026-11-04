@@ -2,6 +2,10 @@
 @inject AysuOgel.Business.Abstract.IAdminPageService AdminPageService
 @{
     var site = await SiteSettingsService.GetCachedAsync();
+    // Logo kutusundaki harf marka adının ilk harfidir (ör. "AysuOgel" → "A").
+    var brandInitial = string.IsNullOrWhiteSpace(site.BrandName)
+        ? "?"
+        : site.BrandName.Trim()[..1].ToUpper(new System.Globalization.CultureInfo("tr-TR"));
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     // Menü, AdminPages tablosundan ve oturumdaki yöneticinin yetkilerinden oluşturulur.
     List<AdminPage> menuPages = isAuthenticated ? await AdminPageService.GetAccessibleAsync(User.GetAdminUserId()) : [];
@@ -25,7 +29,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark admin-navbar">
         <div class="container-fluid px-lg-4">
             <a class="navbar-brand fw-bold" asp-area="Admin" asp-controller="Account" asp-action="Start">
-                <span class="admin-brand-mark">A</span> Aysu Öğel <span class="fw-normal opacity-75">/ Yönetim</span>
+                <span class="admin-brand-mark">@brandInitial</span> @site.BrandName
             </a>
             @if (User.Identity?.IsAuthenticated == true)
             {
@@ -72,8 +76,8 @@
 
     <footer class="admin-footer px-3 px-lg-4 py-3">
         <div class="container-fluid d-flex justify-content-between flex-wrap gap-2">
-            <span>Aysu Öğel Sağlıklı Yaşam</span>
-            <span>Yönetim Paneli · @DateTime.Now.Year</span>
+            <span>@site.SiteTitle</span>
+            <span>@site.BrandName Yönetim Paneli · @DateTime.Now.Year</span>
         </div>
     </footer>
 

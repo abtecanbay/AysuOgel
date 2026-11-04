@@ -49,7 +49,7 @@ public class MembersController : Controller
     public async Task<IActionResult> Create(MemberFormViewModel model)
     {
         model.Id = 0;
-        await ValidateEmailAsync(model);
+        await ValidateContactAsync(model);
 
         Package? package = null;
         if (model.PackageId is { } packageId)
@@ -71,7 +71,7 @@ public class MembersController : Controller
                 FirstName = model.FirstName.Trim(),
                 LastName = model.LastName.Trim(),
                 Email = model.Email,
-                Phone = model.Phone.Trim()
+                Phone = model.Phone
             },
             model.Password!, package!.Id, model.StartDate!.Value, model.EndDate);
 
@@ -98,7 +98,7 @@ public class MembersController : Controller
     public async Task<IActionResult> Edit(int id, MemberFormViewModel model)
     {
         if (id != model.Id || id == 0) return BadRequest();
-        await ValidateEmailAsync(model);
+        await ValidateContactAsync(model);
         if (!ModelState.IsValid) return View(model);
 
         await _members.UpdateAsync(
@@ -108,7 +108,7 @@ public class MembersController : Controller
                 FirstName = model.FirstName.Trim(),
                 LastName = model.LastName.Trim(),
                 Email = model.Email,
-                Phone = model.Phone.Trim()
+                Phone = model.Phone
             },
             model.Password);
 
@@ -126,11 +126,26 @@ public class MembersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task ValidateEmailAsync(MemberFormViewModel model)
+    private async Task ValidateContactAsync(MemberFormViewModel model)
     {
-        if (!string.IsNullOrWhiteSpace(model.Email)
-            && await _members.EmailExistsAsync(model.Email, model.IsNew ? null : model.Id))
+        var exceptId = model.IsNew ? (int?)null : model.Id;
+        var hasEmail = !string.IsNullOrWhiteSpace(model.Email);
+        var hasPhone = !string.IsNullOrWhiteSpace(model.Phone);
+
+        if (!hasEmail && !hasPhone)
+        {
+            const string msg = "E-posta veya telefondan en az biri girilmelidir.";
+            ModelState.AddModelError(nameof(model.Email), msg);
+            ModelState.AddModelError(nameof(model.Phone), msg);
+            return;
+        }
+
+        if (hasEmail && await _members.EmailExistsAsync(model.Email, exceptId))
             ModelState.AddModelError(nameof(model.Email), "Bu e-posta adresiyle kayıtlı başka bir üye var.");
+
+        if (hasPhone && ModelState.GetFieldValidationState(nameof(model.Phone)) != Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid
+            && await _members.PhoneExistsAsync(model.Phone, exceptId))
+            ModelState.AddModelError(nameof(model.Phone), "Bu telefon numarasıyla kayıtlı başka bir üye var.");
     }
 
     // ---- Satın alınan paketler ----

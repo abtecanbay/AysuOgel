@@ -17,17 +17,16 @@ public class MemberFormViewModel : IValidatableObject
     [MaxLength(80, ErrorMessage = "En fazla 80 karakter olabilir.")]
     public string LastName { get; set; } = string.Empty;
 
+    // E-posta ve telefondan en az biri zorunludur; kontrol controller'da yapılır.
+
     [Display(Name = "E-posta")]
-    [Required(ErrorMessage = "E-posta zorunludur.")]
     [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi girin.")]
     [MaxLength(150, ErrorMessage = "En fazla 150 karakter olabilir.")]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     [Display(Name = "Telefon")]
-    [Required(ErrorMessage = "Telefon zorunludur.")]
-    [Phone(ErrorMessage = "Geçerli bir telefon numarası girin.")]
-    [MaxLength(30, ErrorMessage = "En fazla 30 karakter olabilir.")]
-    public string Phone { get; set; } = string.Empty;
+    [RegularExpression(@"^\d{9,12}$", ErrorMessage = "Telefon yalnızca rakam içermeli ve 9–12 haneli olmalıdır.")]
+    public string? Phone { get; set; }
 
     [Display(Name = "Şifre")]
     [DataType(DataType.Password)]
