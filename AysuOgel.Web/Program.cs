@@ -34,51 +34,53 @@ builder.Services.AddScoped<IAdminPageService, AdminPageService>();
 builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 builder.Services.AddMemoryCache();
 
+// IP başına kayan pencere (sliding window) limitleri. Sabit pencerenin aksine sayaç
+// pencere sınırında birden sıfırlanmaz; "son X dakikada kaç istek" her an hesaplanır,
+// böylece sınırdan hemen önce ve hemen sonra art arda deneme yapılamaz.
+var rateLimitWindows = new Dictionary<string, TimeSpan>
+{
+    ["contact"] = TimeSpan.FromMinutes(10),      // iletişim formu: 10 dakikada 5 gönderim
+    ["admin-login"] = TimeSpan.FromMinutes(15),  // yönetici girişi: 15 dakikada 5 deneme
+    ["member-login"] = TimeSpan.FromMinutes(15)  // üye girişi (seans sorgulama): 15 dakikada 10 deneme
+};
+
 builder.Services.AddRateLimiter(o =>
 {
     o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     o.OnRejected = async (ctx, ct) =>
     {
-        ctx.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
-        await ctx.HttpContext.Response.WriteAsync(
-            "Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.", ct);
+        var http = ctx.HttpContext;
+
+        // Kayan pencere limiter'ı kalan süreyi bildirmez. Limiti dolduran bir IP en geç
+        // pencere süresi kadar sonra tekrar hak kazanır; bu güvenli üst sınırı bildiriyoruz.
+        var policy = http.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName;
+        var message = "Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.";
+        if (policy is not null && rateLimitWindows.TryGetValue(policy, out var window))
+        {
+            http.Response.Headers.RetryAfter = ((int)window.TotalSeconds).ToString();
+            message = $"Çok fazla deneme yaptınız. Lütfen {(int)window.TotalMinutes} dakika sonra tekrar deneyin.";
+        }
+
+        http.Response.ContentType = "text/plain; charset=utf-8";
+        await http.Response.WriteAsync(message, ct);
     };
 
-    // Aynı IP'den iletişim formuna 10 dakikada en fazla 5 gönderim.
-    o.AddPolicy("contact", http =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(10),
-                QueueLimit = 0,
-                AutoReplenishment = true
-            }));
+    void AddIpSlidingPolicy(string name, int permitLimit) =>
+        o.AddPolicy(name, http =>
+            RateLimitPartition.GetSlidingWindowLimiter(
+                http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new SlidingWindowRateLimiterOptions
+                {
+                    PermitLimit = permitLimit,
+                    Window = rateLimitWindows[name],
+                    SegmentsPerWindow = 5,
+                    QueueLimit = 0,
+                    AutoReplenishment = true
+                }));
 
-    // Aynı IP'den yönetici girişine 15 dakikada en fazla 5 deneme.
-    o.AddPolicy("admin-login", http =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(15),
-                QueueLimit = 0,
-                AutoReplenishment = true
-            }));
-
-    // Aynı IP'den üye girişine (seans sorgulama) 15 dakikada en fazla 10 deneme.
-    o.AddPolicy("member-login", http =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            http.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 10,
-                Window = TimeSpan.FromMinutes(15),
-                QueueLimit = 0,
-                AutoReplenishment = true
-            }));
+    AddIpSlidingPolicy("contact", permitLimit: 5);
+    AddIpSlidingPolicy("admin-login", permitLimit: 5);
+    AddIpSlidingPolicy("member-login", permitLimit: 10);
 });
 
 // Panelden eklenen yöneticiler yalnızca kendilerine atanan sayfalara erişebilir;
